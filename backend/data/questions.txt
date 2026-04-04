@@ -1,0 +1,15 @@
+React: What is virtual DOM?
+React: What are hooks in React?
+React: Difference between state and props?
+
+Java: What is OOP?
+Java: Explain inheritance in Java.
+
+DBMS: What is normalization?
+DBMS: What is indexing?
+
+OS: What is deadlock?
+OS: Explain process vs thread.
+
+HR: Tell me about yourself.
+HR: What are your strengths?
