@@ -1,22 +1,29 @@
+import os
+import shutil
+import json
+import re
+
 from fastapi import APIRouter, UploadFile, File, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.db.database import SessionLocal
-from app.db.models import User, UserProfile, Answer
+from app.db.models import Answer
 
-from app.services.resume_parser import extract_text_from_pdf, extract_skills
-from app.services.rag_engine import load_vector_store, generate_question_with_llm
-from app.services.evaluation import evaluate_answer, parse_evaluation
+from app.services.rag_engine import (
+    create_or_update_vector_store,
+    load_vector_store,
+    generate_question,
+    evaluate_answer,
+    retrieve_docs,
+    compute_confidence
+)
 from app.services.adaptive import get_next_difficulty
 
 router = APIRouter()
 
-# Load vector DB once
-vectorstore = load_vector_store()
 
-
-# ---------------- DB Dependency ----------------
+# ---------- DB ----------
 def get_db():
     db = SessionLocal()
     try:
@@ -25,89 +32,88 @@ def get_db():
         db.close()
 
 
-# ---------------- Utility ----------------
 def get_user_avg_score(db, user_id):
-    avg = db.query(func.avg(Answer.overall)).filter(Answer.user_id == user_id).scalar()
-    return avg or 0
+    return db.query(func.avg(Answer.overall)).filter(
+        Answer.user_id == user_id
+    ).scalar() or 0
 
 
-# ---------------- 1. Upload Resume ----------------
-@router.post("/upload-resume/")
-async def upload_resume(
-    name: str,
-    email: str,
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db)
-):
+# ---------- SAFE JSON ----------
+def safe_parse_json(text):
     try:
-        text = extract_text_from_pdf(file.file)
-        skills = extract_skills(text)
-    except Exception:
-        return {"error": "Failed to process resume"}
-
-    user = db.query(User).filter(User.email == email).first()
-
-    if not user:
-        user = User(name=name, email=email)
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-
-    existing_profile = db.query(UserProfile).filter(UserProfile.user_id == user.id).first()
-
-    if existing_profile:
-        existing_profile.skills = ",".join(skills)
-    else:
-        profile = UserProfile(user_id=user.id, skills=",".join(skills))
-        db.add(profile)
-
-    db.commit()
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            return json.loads(match.group())
+    except:
+        pass
 
     return {
-        "message": "Resume processed",
-        "user_id": user.id,
-        "skills": skills
+        "technical": 0,
+        "depth": 0,
+        "clarity": 0,
+        "overall": 0,
+        "feedback": "Parsing failed",
+        "missing": ""
     }
 
 
-# ---------------- 2. Generate Question ----------------
+# ---------- UPLOAD PDF ----------
+@router.post("/upload-pdf/")
+async def upload_pdf(user_id: int, file: UploadFile = File(...)):
+    path = f"temp_{file.filename}"
+
+    with open(path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    create_or_update_vector_store(user_id, path)
+    os.remove(path)
+
+    return {"message": "PDF added"}
+
+
+# ---------- GENERATE QUESTION ----------
 @router.get("/generate-question/")
-async def generate_question(
-    topic: str,
-    db: Session = Depends(get_db),
-    user_id: int = 1
-):
-    avg_score = get_user_avg_score(db, user_id)
+async def generate_question_api(user_id: int, topic: str, db: Session = Depends(get_db)):
+    vs = load_vector_store(user_id)
 
-    # TEMP (no DB tracking yet)
-    current_difficulty = "easy"
+    if not vs:
+        return {"error": "No knowledge base"}
 
-    difficulty = get_next_difficulty(avg_score, current_difficulty)
+    docs = retrieve_docs(vs, topic + " operating system scheduling")
 
-    docs = vectorstore.similarity_search(topic, k=3)
-    questions = [doc.page_content for doc in docs]
+    if not docs:
+        return {"error": "No relevant content"}
 
-    new_question = generate_question_with_llm(topic, questions, difficulty)
+    difficulty = get_next_difficulty(get_user_avg_score(db, user_id), "easy")
+
+    q = generate_question(topic, docs, difficulty)
 
     return {
-        "topic": topic,
+        "question": q,
         "difficulty": difficulty,
-        "question": new_question
+        "source": docs[0].page_content[:200],
+        "confidence": compute_confidence(len(docs))
     }
 
 
-# ---------------- 3. Submit Answer ----------------
+# ---------- SUBMIT ANSWER ----------
 @router.post("/submit-answer/")
-async def submit_answer(
-    user_id: int,
-    question: str,
-    answer: str,
-    db: Session = Depends(get_db)
-):
-    raw_result = evaluate_answer(question, answer)
-    scores = parse_evaluation(raw_result)
+async def submit_answer(user_id: int, question: str, answer: str, db: Session = Depends(get_db)):
+    vs = load_vector_store(user_id)
 
-    new_answer = Answer(
+    if not vs:
+        return {"error": "No knowledge base"}
+
+    docs = retrieve_docs(vs, question + " operating system scheduling")
+
+    if not docs:
+        return {"error": "No relevant content for evaluation"}
+
+    raw = evaluate_answer(question, answer, docs)
+
+    scores = safe_parse_json(raw)
+
+    db.add(Answer(
         user_id=user_id,
         question=question,
         answer=answer,
@@ -115,37 +121,13 @@ async def submit_answer(
         depth=scores["depth"],
         clarity=scores["clarity"],
         overall=scores["overall"]
-    )
-
-    db.add(new_answer)
+    ))
     db.commit()
 
     return {
-        "scores": scores
-    }
-
-
-# ---------------- 4. Next Question (Adaptive) ----------------
-@router.get("/next-question/")
-async def next_question(
-    user_id: int,
-    topic: str,
-    db: Session = Depends(get_db)
-):
-    avg_score = get_user_avg_score(db, user_id)
-
-    # TEMP again
-    current_difficulty = "easy"
-
-    difficulty = get_next_difficulty(avg_score, current_difficulty)
-
-    docs = vectorstore.similarity_search(topic, k=3)
-    questions = [doc.page_content for doc in docs]
-
-    new_question = generate_question_with_llm(topic, questions, difficulty)
-
-    return {
-        "topic": topic,
-        "difficulty": difficulty,
-        "question": new_question
+        "scores": scores,
+        "feedback": scores.get("feedback", ""),
+        "missing": scores.get("missing", ""),
+        "source": docs[0].page_content[:200],
+        "confidence": compute_confidence(len(docs))
     }

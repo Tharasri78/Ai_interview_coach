@@ -1,6 +1,7 @@
 from pypdf import PdfReader
 import re
 
+
 def extract_text_from_pdf(file):
     reader = PdfReader(file)
     text = ""
@@ -8,35 +9,21 @@ def extract_text_from_pdf(file):
     for page in reader.pages:
         text += page.extract_text() or ""
 
-    return text
+    return text.lower()
 
 
 def extract_skills(text):
-    text = text.lower()
-
-    # normalize common variations
-    text = text.replace("react.js", "react")
-    text = text.replace("node.js", "node")
-    text = text.replace("express.js", "express")
-    skills_list = [
-        "javascript", "java", "react", "node", "express",
-        "mongodb", "git", "github", "sql", "dbms", "os"
+    skills_db = [
+        "python", "java", "javascript",
+        "react", "node", "express",
+        "mongodb", "sql", "dbms",
+        "os", "machine learning", "ai"
     ]
 
+    found = []
 
-    # tokenize words properly
-    words = re.findall(r'\b[a-zA-Z\+\#\.]+\b', text)
+    for skill in skills_db:
+        if re.search(rf"\b{skill}\b", text):
+            found.append(skill)
 
-    found_skills = []
-
-    for skill in skills_list:
-        skill_words = skill.split()
-
-        if len(skill_words) == 1:
-            if skill in words:
-                found_skills.append(skill)
-        else:
-            if skill in text:
-                found_skills.append(skill)
-
-    return list(set(found_skills))
+    return list(set(found))

@@ -1,6 +1,14 @@
-def main():
-    print("Hello from backend!")
+from fastapi import FastAPI
+from app.db.database import Base, engine
+from app.routes import interview
+
+app = FastAPI()
+
+Base.metadata.create_all(bind=engine)
+
+app.include_router(interview.router)
 
 
-if __name__ == "__main__":
-    main()
+@app.get("/")
+def root():
+    return {"message": "AI Interview Coach Running"}

@@ -1,111 +1,170 @@
 import os
 from dotenv import load_dotenv
-
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pypdf import PdfReader
 from groq import Groq
-load_dotenv()
 
-VECTOR_DB_PATH = "faiss_index"
+load_dotenv()
 
 PRIMARY_MODEL = "llama-3.3-70b-versatile"
 FALLBACK_MODEL = "llama-3.1-8b-instant"
 
-# Groq client
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
+# ---------- LLM ----------
 def call_llm(prompt):
     try:
-        response = client.chat.completions.create(
+        res = client.chat.completions.create(
             model=PRIMARY_MODEL,
             messages=[{"role": "user", "content": prompt}],
         )
-        return response.choices[0].message.content
-
-    except Exception:
-        print("⚠️ Switching to fallback model...")
-
-        response = client.chat.completions.create(
+        return res.choices[0].message.content
+    except:
+        res = client.chat.completions.create(
             model=FALLBACK_MODEL,
             messages=[{"role": "user", "content": prompt}],
         )
-        return response.choices[0].message.content
+        return res.choices[0].message.content
 
 
-def load_questions():
-    file_path = "data/questions.txt"
+# ---------- PDF ----------
+def load_pdf(file_path):
+    reader = PdfReader(file_path)
+    return "".join([p.extract_text() or "" for p in reader.pages])
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
 
-    docs = []
+def split_text(text):
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=100
+    )
+    return splitter.split_text(text)
 
-    for line in lines:
-        if ":" in line:
-            topic, question = line.split(":", 1)
-            docs.append(
-                Document(
-                    page_content=question.strip(),
-                    metadata={"topic": topic.strip().lower()}
-                )
-            )
+
+# ---------- VECTOR ----------
+def get_user_db_path(user_id):
+    return f"faiss_index/user_{user_id}"
+
+
+def create_or_update_vector_store(user_id, pdf_path):
+    db_path = get_user_db_path(user_id)
+
+    text = load_pdf(pdf_path)
+    chunks = split_text(text)
+
+    docs = [
+        Document(
+            page_content=chunk,
+            metadata={"source": f"chunk_{i}"}
+        )
+        for i, chunk in enumerate(chunks)
+    ]
+
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+
+    if os.path.exists(db_path):
+        vs = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
+        vs.add_documents(docs)
+    else:
+        vs = FAISS.from_documents(docs, embeddings)
+
+    vs.save_local(db_path)
+
+
+def load_vector_store(user_id):
+    db_path = get_user_db_path(user_id)
+
+    if not os.path.exists(db_path):
+        return None
+
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    return FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
+
+
+# ---------- RETRIEVAL ----------
+def retrieve_docs(vs, query, k=6):
+    results = vs.similarity_search_with_score(query, k=k)
+
+    if not results:
+        return []
+
+    results = sorted(results, key=lambda x: x[1])
+    docs = [doc for doc, score in results[:4]]
 
     return docs
 
 
-def create_vector_store():
-    docs = load_questions()
-
-    embeddings = HuggingFaceEmbeddings(
-        model_name="all-MiniLM-L6-v2"
-    )
-
-    vectorstore = FAISS.from_documents(docs, embeddings)
-
-    vectorstore.save_local(VECTOR_DB_PATH)
+# ---------- CONFIDENCE ----------
+def compute_confidence(num_docs):
+    if num_docs >= 4:
+        return "high"
+    elif num_docs >= 2:
+        return "medium"
+    else:
+        return "low"
 
 
-def load_vector_store():
-    embeddings = HuggingFaceEmbeddings(
-        model_name="all-MiniLM-L6-v2"
-    )
+# ---------- QUESTION ----------
+def generate_question(topic, docs, difficulty):
+    if not docs:
+        return "No relevant content found"
 
-    return FAISS.load_local(
-        VECTOR_DB_PATH,
-        embeddings,
-        allow_dangerous_deserialization=True
-    )
+    context = "\n\n".join([d.page_content for d in docs])
 
-
-
-
-def generate_question_with_llm(topic, retrieved_questions, difficulty):
     prompt = f"""
-You are a technical interview generator.
+STRICT MODE
 
 Topic: {topic}
 Difficulty: {difficulty}
 
-
-Based on:
-{chr(10).join(retrieved_questions)}
+Context:
+{context}
 
 Rules:
-- Focus on ONE concept only
-- Match the difficulty level:
-  - easy → basic definition
-  - medium → explanation or comparison
-  - hard → scenario or problem-solving
-- Keep it under 20 words
-- No explanation
-- Output ONLY the question
+- Use ONLY context
+- No hallucination
+- Keep under 20 words
 
-Example:
-What is the purpose of self in Python classes?
+Return ONLY question.
 """
+
     return call_llm(prompt)
 
 
-       
+# ---------- EVALUATION ----------
+def evaluate_answer(question, answer, docs):
+    if not docs:
+        return None
+
+    context = "\n\n".join([d.page_content for d in docs])
+
+    prompt = f"""
+STRICT MODE
+
+Question: {question}
+Answer: {answer}
+
+Reference:
+{context}
+
+Rules:
+- Evaluate ONLY using reference
+- No extra text
+- No markdown
+
+Return ONLY JSON:
+{{
+ "technical": 0-10,
+ "depth": 0-10,
+ "clarity": 0-10,
+ "overall": 0-10,
+ "feedback": "...",
+ "missing": "..."
+}}
+"""
+
+    return call_llm(prompt)
