@@ -1,24 +1,33 @@
 import { useState } from "react";
-import API from "../api";
+import { generateQuestion } from "../api/apiService";
 
- export default function Question({ disabled, onQuestion }){
+export default function Question({ disabled, onQuestion }) {
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
+  // ✅ FIX: get userId
+  const userId = localStorage.getItem("user_id");
+
   const generate = async () => {
     if (!topic.trim() || disabled) return;
-    setLoading(true); setData(null); setError("");
+
+    setLoading(true);
+    setData(null);
+    setError("");
 
     try {
-      // Uses /generate-question/ — returns { topic, question }
-      const res = await API.get(`/generate-question/?topic=${encodeURIComponent(topic)}`);
+      const res = await generateQuestion(userId, topic);
       setData(res.data);
-      onQuestion(res.data); // pass full object up
+      onQuestion(res.data);
     } catch (err) {
-      setError(err.response?.data?.detail || "Failed to generate. Make sure a PDF is uploaded.");
+      setError(
+        err.response?.data?.detail ||
+        "Failed to generate. Make sure a PDF is uploaded."
+      );
     }
+
     setLoading(false);
   };
 
@@ -47,8 +56,11 @@ import API from "../api";
           onKeyDown={(e) => e.key === "Enter" && generate()}
           disabled={disabled}
         />
-        <button className="btn btn-blue" onClick={generate}
-          disabled={loading || !topic.trim() || disabled}>
+        <button
+          className="btn btn-blue"
+          onClick={generate}
+          disabled={loading || !topic.trim() || disabled}
+        >
           {loading ? "..." : "Generate"}
         </button>
       </div>
@@ -57,7 +69,6 @@ import API from "../api";
 
       {data && (
         <div className="question-box">
-          {/* Only show what backend actually returns: topic + question */}
           <div className="question-text">{data.question}</div>
           <div className="question-meta">
             <span className="meta-chip chip-src">📌 {data.topic}</span>

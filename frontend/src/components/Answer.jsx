@@ -1,57 +1,101 @@
 import { useState, useEffect } from "react";
-import API from "../api";
+import { submitAnswer } from "../api/apiService";
 
-export default function Answer({ userId, questionData, disabled, onAnswered }) {
+export default function Answer({ questionData, disabled, onAnswered }) {
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+
+  // ✅ FIX: consistent userId source
+  const userId = localStorage.getItem("user_id");
+
+  // ✅ Reset when new question comes
   useEffect(() => {
-  setAnswer("");
-  setResult(null);
-}, [questionData]);
+    setAnswer("");
+    setResult(null);
+  }, [questionData]);
 
   const submit = async () => {
-    if (!answer.trim() || disabled) return;
-    setLoading(true); setResult(null); setError("");
+    // ✅ FIX: added questionData check
+    if (!answer.trim() || disabled || !questionData) return;
+
+    setLoading(true);
+    setResult(null);
+    setError("");
 
     try {
-      const res = await API.post("/submit-answer/", {
-        user_id: userId,
-        question: questionData.question,
-        answer,
-      });
+      const res = await submitAnswer(userId, questionData.question, answer);
+
+      // ✅ FIX: handle backend error response
+      if (res.data.error) {
+        setError(res.data.error);
+        setLoading(false);
+        return;
+      }
+
       setResult(res.data);
+
       if (onAnswered) onAnswered(); // trigger history refresh
     } catch (err) {
-      setError(err.response?.data?.detail || "Submission failed. Please try again.");
+      setError(
+        err.response?.data?.detail ||
+        "Submission failed. Please try again."
+      );
     }
+
     setLoading(false);
   };
 
-  const score = result?.scores?.overall ?? 0; 
+  // ✅ FIX: safer score extraction
+  const score = result?.scores?.overall ?? result?.score ?? 0;
+
   const missingPoints = result?.missing
-    ? (Array.isArray(result.missing) ? result.missing : result.missing.split(",").map(p => p.trim()).filter(Boolean))
+    ? Array.isArray(result.missing)
+      ? result.missing
+      : result.missing
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean)
     : [];
 
   return (
-    <div className="card" style={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+    <div
+      className="card"
+      style={{
+        opacity: disabled ? 0.5 : 1,
+        pointerEvents: disabled ? "none" : "auto",
+      }}
+    >
       <div className="card-header">
         <div className="card-title-group">
           <div className="card-icon purple">✍️</div>
           <div>
             <div className="card-title">Submit Your Answer</div>
-            <div className="card-sub">{disabled ? "Generate a question first" : "Step 3 — Write your answer"}</div>
+            <div className="card-sub">
+              {disabled
+                ? "Generate a question first"
+                : "Step 3 — Write your answer"}
+            </div>
           </div>
         </div>
+
         {result && (
-          <span className={`card-badge ${score >= 75 ? "badge-success" : "badge-info"}`}>
+          <span
+            className={`card-badge ${
+              score >= 75 ? "badge-success" : "badge-info"
+            }`}
+          >
             Score: {score}/100
           </span>
         )}
       </div>
 
-      {loading && <div className="loading-bar"><div className="loading-bar-fill" /></div>}
+      {loading && (
+        <div className="loading-bar">
+          <div className="loading-bar-fill" />
+        </div>
+      )}
 
       {questionData ? (
         <div className="msg msg-info" style={{ marginBottom: 16 }}>
@@ -64,6 +108,7 @@ export default function Answer({ userId, questionData, disabled, onAnswered }) {
       )}
 
       <div className="field-label">Your Answer</div>
+
       <textarea
         className="textarea-input"
         placeholder="Type your answer here. Be as detailed as possible..."
@@ -73,12 +118,20 @@ export default function Answer({ userId, questionData, disabled, onAnswered }) {
         disabled={disabled}
       />
 
-      <button className="btn btn-blue btn-full" style={{ marginTop: 14 }}
-        onClick={submit} disabled={loading || !answer.trim() || disabled}>
+      <button
+        className="btn btn-blue btn-full"
+        style={{ marginTop: 14 }}
+        onClick={submit}
+        disabled={loading || !answer.trim() || disabled}
+      >
         {loading ? "Evaluating..." : "Submit Answer →"}
       </button>
 
-      {error && <div className="msg msg-error" style={{ marginTop: 12 }}>✕ {error}</div>}
+      {error && (
+        <div className="msg msg-error" style={{ marginTop: 12 }}>
+          ✕ {error}
+        </div>
+      )}
 
       {result && (
         <div className="result-box">
@@ -86,8 +139,15 @@ export default function Answer({ userId, questionData, disabled, onAnswered }) {
             <div className="score-circle" style={{ "--score": score }}>
               <span className="score-num">{score}</span>
             </div>
+
             <div className="score-info">
-              <h4>{score >= 85 ? "Excellent!" : score >= 65 ? "Good effort" : "Needs improvement"}</h4>
+              <h4>
+                {score >= 85
+                  ? "Excellent!"
+                  : score >= 65
+                  ? "Good effort"
+                  : "Needs improvement"}
+              </h4>
               <p>Overall score out of 100</p>
             </div>
           </div>
@@ -103,7 +163,9 @@ export default function Answer({ userId, questionData, disabled, onAnswered }) {
             <div className="result-section">
               <div className="result-section-label">Missing Points</div>
               <ul className="missing-list">
-                {missingPoints.map((pt, i) => <li key={i}>⚠ {pt}</li>)}
+                {missingPoints.map((pt, i) => (
+                  <li key={i}>⚠ {pt}</li>
+                ))}
               </ul>
             </div>
           )}

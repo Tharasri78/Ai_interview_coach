@@ -3,7 +3,7 @@ import "./Dashboard.css";
 import Upload from "../components/Upload";
 import Question from "../components/Question";
 import Answer from "../components/Answer";
-import API from "../api";
+import { getHistory } from "../api/apiService";
 
 export default function Dashboard({ setPage }) {
   const [tab, setTab] = useState("practice");
@@ -26,7 +26,7 @@ export default function Dashboard({ setPage }) {
   const fetchHistory = async () => {
     setHistoryLoading(true);
     try {
-      const res = await API.get(`/history/${userId}`);
+      const res = await getHistory(userId);
       setHistory(res.data || []);
     } catch {
       setHistory([]); // fail silently, show empty state
