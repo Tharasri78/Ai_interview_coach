@@ -45,7 +45,6 @@ def split_text(text):
     return splitter.split_text(text)
 
 
-
 # ---------- VECTOR ----------
 def get_user_db_path(user_id):
     return f"faiss_index/user_{user_id}"
@@ -142,9 +141,9 @@ def evaluate_answer(question, answer, docs):
         return None
 
     context = "\n\n".join([d.page_content for d in docs])
-     
+
     prompt = f"""
-STRICT MODE
+STRICT MODE (VERY IMPORTANT)
 
 Question: {question}
 Answer: {answer}
@@ -152,20 +151,22 @@ Answer: {answer}
 Reference:
 {context}
 
-Evaluation Rules:
-- Use reference as support but allow correct external knowledge
-- DO NOT reward vague or one-line answers
-- Answers must explain "what + how + purpose"
-- If answer is too short (less than 1 meaningful sentence), score MUST be <= 4
-- If answer lacks explanation, max score = 5
-- Only detailed answers can score above 7
+STRICT RULES (MUST FOLLOW):
+- If answer is less than 8 words → overall MUST be <= 3
+- If answer is only definition without explanation → overall MUST be <= 5
+- If answer does NOT explain how it works → max overall = 4
+- ONLY detailed answers with explanation can score above 7
+- DO NOT give high score for keyword matching
+
+Bad Answer Example:
+"keygen is a function" → score should be 2–3
 
 Scoring Guide (0–10):
-- 9–10: Detailed, complete explanation with technical clarity
-- 7–8: Good explanation with minor gaps
-- 5–6: Basic definition, limited depth
-- 3–4: Very shallow or incomplete
-- 0–2: Incorrect or irrelevant
+- 9–10: complete + detailed + technical explanation
+- 7–8: good explanation but minor missing
+- 5–6: basic idea only
+- 3–4: shallow / incomplete
+- 0–2: wrong or useless
 
 Return ONLY JSON:
 {{
@@ -174,9 +175,8 @@ Return ONLY JSON:
  "clarity": number,
  "overall": number,
  "feedback": "short feedback",
- "missing": "only key missing points"
+ "missing": "key missing points"
 }}
 """
-
 
     return call_llm(prompt)

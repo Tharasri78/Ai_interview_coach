@@ -174,6 +174,21 @@ async def submit_answer(data: AnswerRequest, db: Session = Depends(get_db)):
     raw = evaluate_answer(data.question, data.answer, docs)
 
     scores = safe_parse_json(raw)
+    answer_words = len(data.answer.strip().split())
+
+#  HARD PENALTY RULES
+    if answer_words <= 2:
+        scores["overall"] = min(scores["overall"], 2)
+
+    elif answer_words <= 6:
+        scores["overall"] = min(scores["overall"], 4)
+
+    elif answer_words <= 12:
+        scores["overall"] = min(scores["overall"], 6)
+
+    
+    if not any(word in data.answer.lower() for word in ["because", "used", "helps", "means", "by", "so that"]):
+        scores["overall"] = min(scores["overall"], 5)
 
     db.add(Answer(
         user_id=data.user_id,
