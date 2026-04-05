@@ -45,6 +45,7 @@ def split_text(text):
     return splitter.split_text(text)
 
 
+
 # ---------- VECTOR ----------
 def get_user_db_path(user_id):
     return f"faiss_index/user_{user_id}"
@@ -66,10 +67,10 @@ def create_or_update_vector_store(user_id, pdf_path):
 
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-    if os.path.exists(db_path):
+    try:
         vs = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
         vs.add_documents(docs)
-    else:
+    except:
         vs = FAISS.from_documents(docs, embeddings)
 
     vs.save_local(db_path)
@@ -141,7 +142,7 @@ def evaluate_answer(question, answer, docs):
         return None
 
     context = "\n\n".join([d.page_content for d in docs])
-
+     
     prompt = f"""
 STRICT MODE
 
@@ -151,20 +152,31 @@ Answer: {answer}
 Reference:
 {context}
 
-Rules:
-- Evaluate ONLY using reference
-- No extra text
-- No markdown
+Evaluation Rules:
+- Use reference as support but allow correct external knowledge
+- DO NOT reward vague or one-line answers
+- Answers must explain "what + how + purpose"
+- If answer is too short (less than 1 meaningful sentence), score MUST be <= 4
+- If answer lacks explanation, max score = 5
+- Only detailed answers can score above 7
+
+Scoring Guide (0–10):
+- 9–10: Detailed, complete explanation with technical clarity
+- 7–8: Good explanation with minor gaps
+- 5–6: Basic definition, limited depth
+- 3–4: Very shallow or incomplete
+- 0–2: Incorrect or irrelevant
 
 Return ONLY JSON:
 {{
- "technical": 0-10,
- "depth": 0-10,
- "clarity": 0-10,
- "overall": 0-10,
- "feedback": "...",
- "missing": "..."
+ "technical": number,
+ "depth": number,
+ "clarity": number,
+ "overall": number,
+ "feedback": "short feedback",
+ "missing": "only key missing points"
 }}
 """
+
 
     return call_llm(prompt)

@@ -7,8 +7,7 @@ export default function Answer({ questionData, disabled, onAnswered }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
-  // ✅ FIX: consistent userId source
-  const userId = localStorage.getItem("user_id");
+  const userId = Number(localStorage.getItem("user_id"));
 
   // ✅ Reset when new question comes
   useEffect(() => {
@@ -38,17 +37,19 @@ export default function Answer({ questionData, disabled, onAnswered }) {
 
       if (onAnswered) onAnswered(); // trigger history refresh
     } catch (err) {
-      setError(
-        err.response?.data?.detail ||
-        "Submission failed. Please try again."
-      );
+       setError(
+  err.response?.data?.error ||
+  err.response?.data?.message ||
+  "Submission failed. Please try again."
+);
     }
 
     setLoading(false);
   };
 
   // ✅ FIX: safer score extraction
-  const score = result?.scores?.overall ?? result?.score ?? 0;
+const score = Math.round(result?.scores?.overall ?? result?.score ?? 0);
+const percentage = score * 10; // convert /10 → /100 for UI
 
   const missingPoints = result?.missing
     ? Array.isArray(result.missing)
@@ -83,10 +84,10 @@ export default function Answer({ questionData, disabled, onAnswered }) {
         {result && (
           <span
             className={`card-badge ${
-              score >= 75 ? "badge-success" : "badge-info"
+              score >= 8 ? "badge-success" : "badge-info"
             }`}
           >
-            Score: {score}/100
+            Score: {score}/10
           </span>
         )}
       </div>
@@ -136,19 +137,19 @@ export default function Answer({ questionData, disabled, onAnswered }) {
       {result && (
         <div className="result-box">
           <div className="score-row">
-            <div className="score-circle" style={{ "--score": score }}>
-              <span className="score-num">{score}</span>
+            <div className="score-circle" style={{ "--score": percentage }}>
+              <span className="score-num">{score}/10</span>
             </div>
 
             <div className="score-info">
               <h4>
-                {score >= 85
+                {score >= 8
                   ? "Excellent!"
-                  : score >= 65
+                  : score >= 6
                   ? "Good effort"
                   : "Needs improvement"}
               </h4>
-              <p>Overall score out of 100</p>
+              <p>Overall score out of 10</p>
             </div>
           </div>
 

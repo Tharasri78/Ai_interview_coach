@@ -30,15 +30,25 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
     formData.append("file", file);
 
     try {
-      await uploadPDF(userId, formData);
+  const res = await uploadPDF(userId, formData);
 
-      setMsg("PDF uploaded successfully.");
-      setStatus("success");
-      onUploaded();
-    } catch (err) {
-      setMsg(err.response?.data?.detail || "Upload failed.");
-      setStatus("error");
-    }
+  if (res.data?.message) {
+    setMsg(res.data.message);
+    setStatus("success");
+    onUploaded();
+  } else {
+    setMsg("Upload failed.");
+    setStatus("error");
+  }
+
+} catch (err) {
+  setMsg(
+    err.response?.data?.error ||
+    err.response?.data?.message ||
+    "Upload failed."
+  );
+  setStatus("error");
+}
 
     setLoading(false);
   };

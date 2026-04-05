@@ -104,17 +104,25 @@ async def login(email: str, password: str, db: Session = Depends(get_db)):
         "email": user.email
     }    
 # ---------- UPLOAD PDF ----------
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 @router.post("/upload-pdf/")
 async def upload_pdf(user_id: int, file: UploadFile = File(...)):
-    path = f"temp_{file.filename}"
+    print("UPLOAD HIT:", user_id)
+    file_path = f"{UPLOAD_DIR}/{user_id}_{file.filename}"
 
-    with open(path, "wb") as f:
-        shutil.copyfileobj(file.file, f)
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
 
-    create_or_update_vector_store(user_id, path)
-    os.remove(path)
+    from app.services.rag_engine import create_or_update_vector_store
+    create_or_update_vector_store(user_id, file_path)
 
-    return {"message": "PDF uploaded successfully"}
+    return {
+    "status": "success",
+    "message": "PDF uploaded successfully"
+}
 
 
 # ---------- GENERATE QUESTION ----------
@@ -142,26 +150,35 @@ async def generate_question_api(user_id: int, topic: str, db: Session = Depends(
 
 
 # ---------- SUBMIT ANSWER ----------
+from pydantic import BaseModel
+
+class AnswerRequest(BaseModel):
+    user_id: int
+    question: str
+    answer: str
+
+
 @router.post("/submit-answer/")
-async def submit_answer(user_id: int, question: str, answer: str, db: Session = Depends(get_db)):
-    vs = load_vector_store(user_id)
+async def submit_answer(data: AnswerRequest, db: Session = Depends(get_db)):
+
+    vs = load_vector_store(data.user_id)
 
     if not vs:
         return {"error": "No knowledge base"}
 
-    docs = retrieve_docs(vs, question)
+    docs = retrieve_docs(vs, data.question)
 
     if not docs:
         return {"error": "No relevant content for evaluation"}
 
-    raw = evaluate_answer(question, answer, docs)
+    raw = evaluate_answer(data.question, data.answer, docs)
 
     scores = safe_parse_json(raw)
 
     db.add(Answer(
-        user_id=user_id,
-        question=question,
-        answer=answer,
+        user_id=data.user_id,
+        question=data.question,
+        answer=data.answer,
         technical=scores["technical"],
         depth=scores["depth"],
         clarity=scores["clarity"],
@@ -176,7 +193,6 @@ async def submit_answer(user_id: int, question: str, answer: str, db: Session = 
         "source": docs[0].page_content[:200],
         "confidence": compute_confidence(len(docs))
     }
-
 
 # ---------- HISTORY ----------
 @router.get("/history/{user_id}")

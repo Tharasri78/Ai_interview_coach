@@ -71,7 +71,7 @@ export default function Question({ disabled, onQuestion }) {
         <div className="question-box">
           <div className="question-text">{data.question}</div>
           <div className="question-meta">
-            <span className="meta-chip chip-src">📌 {data.topic}</span>
+            <span className="meta-chip chip-src"> {data.topic}</span>
           </div>
         </div>
       )}

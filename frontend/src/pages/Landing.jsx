@@ -1,6 +1,10 @@
 import "./Landing.css";
+import { useNavigate } from "react-router-dom";
 
-export default function Landing({ setPage }) {
+
+export default function Landing() {
+  const navigate = useNavigate();
+
   return (
     <div>
       <nav className="nav">
@@ -10,8 +14,8 @@ export default function Landing({ setPage }) {
           <li><a href="#process">How it works</a></li>
         </ul>
         <div className="nav-cta">
-          <button className="btn-ghost" onClick={() => setPage("auth")}>Sign in</button>
-          <button className="btn-nav-primary" onClick={() => setPage("auth")}>Get started</button>
+          <button className="btn-ghost" onClick={() => navigate("/auth")}>Sign in</button>
+          <button className="btn-nav-primary" onClick={() => navigate("/auth")}>Get started</button>
         </div>
       </nav>
 
@@ -24,7 +28,7 @@ export default function Landing({ setPage }) {
           Prepply generates precise questions from your content and evaluates every answer.
         </p>
         <div className="hero-actions">
-          <button className="btn-cta-primary" onClick={() => setPage("auth")}>Start for free</button>
+          <button className="btn-cta-primary" onClick={() => navigate("/auth")}>Start for free</button>
           <button className="btn-cta-secondary">See how it works</button>
         </div>
         <div className="hero-proof">

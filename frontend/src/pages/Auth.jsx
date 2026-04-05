@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { signupUser, loginUser } from "../api/apiService";
 import "./Auth.css";
+import { useNavigate } from "react-router-dom";
 
-export default function Auth({ setPage }) {
+export default function Auth() {
+  const navigate = useNavigate();
+
   const [mode, setMode] = useState("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -36,7 +39,7 @@ export default function Auth({ setPage }) {
       localStorage.setItem("user_name", res.data.name);
       localStorage.setItem("user_email", res.data.email);
 
-      setPage("dashboard");
+      navigate("/dashboard");
     } catch {
       alert("Authentication failed");
     }

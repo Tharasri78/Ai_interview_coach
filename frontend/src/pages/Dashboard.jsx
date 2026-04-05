@@ -4,8 +4,10 @@ import Upload from "../components/Upload";
 import Question from "../components/Question";
 import Answer from "../components/Answer";
 import { getHistory } from "../api/apiService";
+import { useNavigate } from "react-router-dom";
 
-export default function Dashboard({ setPage }) {
+export default function Dashboard() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState("practice");
 
   // Real state — each step only unlocks after previous completes
@@ -38,7 +40,7 @@ export default function Dashboard({ setPage }) {
     localStorage.removeItem("user_id");
     localStorage.removeItem("user_email");
     localStorage.removeItem("user_name");
-    setPage("landing");
+    navigate("/landing");
   };
 
   const step = !isUploaded ? 1 : !questionData ? 2 : 3;
@@ -52,7 +54,7 @@ export default function Dashboard({ setPage }) {
   return (
     <div className="dashboard-layout">
       <aside className="sidebar">
-        <div className="sidebar-logo" onClick={() => setPage("landing")} style={{ cursor: "pointer" }}>
+        <div className="sidebar-logo" onClick={() => navigate("/landing")} style={{ cursor: "pointer" }}>
           Interview<span>AI</span>
         </div>
 

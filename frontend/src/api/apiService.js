@@ -16,7 +16,7 @@ export const loginUser = (email, password) => {
 /* Upload PDF */
 export const uploadPDF = (userId, formData) => {
   return API.post(`/upload-pdf/?user_id=${userId}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+    
   });
 };
 
