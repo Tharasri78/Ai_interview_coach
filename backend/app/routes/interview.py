@@ -131,3 +131,21 @@ async def submit_answer(user_id: int, question: str, answer: str, db: Session = 
         "source": docs[0].page_content[:200],
         "confidence": compute_confidence(len(docs))
     }
+
+@router.get("/history/{user_id}")
+async def get_history(user_id: int, db: Session = Depends(get_db)):
+    answers = (
+        db.query(Answer)
+        .filter(Answer.user_id == user_id)
+        .order_by(Answer.id.desc())
+        .all()
+    )
+
+    return [
+        {
+            "question": a.question,
+            "score": a.overall,
+            "topic": "General"
+        }
+        for a in answers
+    ]    

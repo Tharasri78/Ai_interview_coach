@@ -6,23 +6,9 @@ import Dashboard from "./pages/Dashboard";
 function App() {
   const [page, setPage] = useState("landing");
 
-  const renderPage = () => {
-    if (page === "landing") {
-      return <Landing setPage={setPage} />;
-    }
-    if (page === "auth") {
-      return <Auth setPage={setPage} />;
-    }
-    if (page === "dashboard") {
-      return <Dashboard />;
-    }
-  };
-
-  return (
-    <div>
-      {renderPage()}
-    </div>
-  );
+  if (page === "landing") return <Landing setPage={setPage} />;
+  if (page === "auth")    return <Auth setPage={setPage} />;
+  if (page === "dashboard") return <Dashboard setPage={setPage} />;
 }
 
 export default App;
