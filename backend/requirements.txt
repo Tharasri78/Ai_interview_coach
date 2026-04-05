@@ -4,11 +4,18 @@ python-dotenv==1.0.1
 sqlalchemy==2.0.29
 pydantic==2.6.4
 
+# LangChain (only for RAG, not LLM now)
 langchain==0.1.16
+langchain-core==0.1.52
 langchain-community==0.0.32
 
-openai==1.14.3
+# Groq (LLM)
+groq==0.9.0
 
+# Vector + NLP
 faiss-cpu==1.7.4
 pypdf==4.2.0
+sentence-transformers==2.6.1
+
+# FastAPI file handling
 python-multipart==0.0.9
