@@ -207,7 +207,7 @@ export default function Dashboard() {
     {h.overall >= 8 ? "Strong" :
      h.overall >= 5 ? "Average" : "Weak"}
   </span>
-</div>
+</div>`
               {openIndex === i && (
   <div className="history-details">
     <p><strong>Answer:</strong> {h.answer}</p>
