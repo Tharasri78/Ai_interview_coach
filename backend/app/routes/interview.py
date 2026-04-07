@@ -110,21 +110,32 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.post("/upload-pdf/")
 async def upload_pdf(user_id: int, file: UploadFile = File(...)):
-    print("UPLOAD HIT:", user_id)
-    file_path = f"{UPLOAD_DIR}/{user_id}_{file.filename}"
+    try:
+        print("UPLOAD HIT:", user_id)
 
-    with open(file_path, "wb") as f:
-        f.write(await file.read())
+        file_path = f"{UPLOAD_DIR}/{user_id}_{file.filename}"
 
-    from app.services.rag_engine import create_or_update_vector_store
-    create_or_update_vector_store(user_id, file_path)
+        
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
 
-    return {
-    "status": "success",
-    "message": "PDF uploaded successfully"
-}
+        print("FILE SAVED:", file_path)
 
+        import threading
+        threading.Thread(
+            target=create_or_update_vector_store,
+            args=(user_id, file_path)
+        ).start()
 
+        return {
+            "status": "success",
+            "message": "PDF uploaded. Processing in background."
+        }
+
+    except Exception as e:
+        print("UPLOAD ERROR:", str(e))
+        return {"error": "Upload failed"}
+    
 # ---------- GENERATE QUESTION ----------
 @router.get("/generate-question/")
 async def generate_question_api(user_id: int, topic: str, db: Session = Depends(get_db)):
@@ -220,10 +231,13 @@ async def get_history(user_id: int, db: Session = Depends(get_db)):
     )
 
     return [
-        {
-            "question": a.question,
-            "score": a.overall,
-            "topic": "General"
-        }
-        for a in answers
-    ]
+    {
+        "question": a.question,
+        "answer": a.answer,
+        "technical": a.technical,
+        "depth": a.depth,
+        "clarity": a.clarity,
+        "overall": a.overall
+    }
+    for a in answers
+]

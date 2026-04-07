@@ -33,7 +33,7 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
   const res = await uploadPDF(userId, formData);
 
   if (res.data?.message) {
-    setMsg(res.data.message);
+    setMsg("File Uploaded.");
     setStatus("success");
     onUploaded();
   } else {
@@ -42,6 +42,7 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
   }
 
 } catch (err) {
+   console.error("UPLOAD ERROR:", err); 
   setMsg(
     err.response?.data?.error ||
     err.response?.data?.message ||
@@ -54,24 +55,73 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
   };
 
   return (
-    <div className="card">
-      <h3>Upload PDF</h3>
+  <div className="card">
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".pdf"
-        onChange={(e) => handleFile(e.target.files[0])}
-      />
-
-      {file && (
-        <button onClick={handleUpload} disabled={loading || isUploaded}>
-          {loading ? "Uploading..." : "Upload"}
-        </button>
-      )}
-
-      {status === "success" && <p style={{ color: "green" }}>{msg}</p>}
-      {status === "error" && <p style={{ color: "red" }}>{msg}</p>}
+    {/* Header */}
+    <div className="card-header">
+      <div className="card-title-group">
+        <div>
+          <div className="card-title">Upload PDF</div>
+          <div className="card-sub">
+            Upload resume or study material to generate better questions
+          </div>
+          <div className="upload-hint">
+            Supported: Resume, Notes, Study PDFs
+          </div>
+        </div>
+      </div>
     </div>
-  );
+
+    {/* DROPZONE (use your CSS) */}
+    <div
+      className={`upload-dropzone ${file ? "has-file" : ""}`}
+      onClick={() => inputRef.current.click()}
+    >
+      <div className="upload-icon">📂</div>
+
+      {!file ? (
+        <div className="upload-text">
+          <strong>Click to upload</strong> or drag and drop
+        </div>
+      ) : (
+        <div className="upload-text">
+          Selected: <strong>{file.name}</strong>
+        </div>
+      )}
+    </div>
+
+    {/* Hidden Input */}
+    <input
+      ref={inputRef}
+      type="file"
+      accept=".pdf"
+      style={{ display: "none" }}
+      onChange={(e) => handleFile(e.target.files[0])}
+    />
+
+    {/* Upload Button */}
+    {file && (
+      <div style={{ marginTop: 12 }}>
+        <button
+          onClick={handleUpload}
+          disabled={loading || isUploaded}
+          className="btn btn-primary btn-full"
+        >
+          {loading ? "Uploading..." : "Upload & Process"}
+        </button>
+      </div>
+    )}
+
+    {/* Messages */}
+    {status === "success" && (
+      <div className="msg msg-success">{msg}</div>
+    )}
+
+    {status === "error" && (
+      <div className="msg msg-error">{msg}</div>
+    )}
+
+  </div>
+);
+  
 }

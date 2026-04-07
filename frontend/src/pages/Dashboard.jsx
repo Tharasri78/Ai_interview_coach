@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [isUploaded, setIsUploaded] = useState(false);
   const [questionData, setQuestionData] = useState(null); // full question object
   const [history, setHistory] = useState([]);
+  const [openIndex, setOpenIndex] = useState(null);
   const [historyLoading, setHistoryLoading] = useState(false);
 
   const userId = Number(localStorage.getItem("user_id")) || 1;
@@ -138,47 +139,103 @@ export default function Dashboard() {
           </>
         )}
 
-        {tab === "history" && (
-          <>
-            <div className="page-header">
-              <h1 className="page-title">Session History</h1>
-              <p className="page-subtitle">Your past questions and scores.</p>
+            {/* HISTORY */}
+{tab === "history" && (
+  <>
+    <div className="page-header">
+      <h1 className="page-title">Session History</h1>
+      <p className="page-subtitle">Your past questions and performance breakdown.</p>
+    </div>
+
+    <div className="card">
+      <div className="card-header">
+        <div className="card-title-group">
+          <div className="card-icon blue">📊</div>
+          <div>
+            <div className="card-title">Past Attempts</div>
+            <div className="card-sub">{history.length} sessions recorded</div>
+          </div>
+        </div>
+
+        <button className="btn btn-outline btn-sm" onClick={fetchHistory}>
+          ↻ Refresh
+        </button>
+      </div>
+
+      {/* Loading */}
+      {historyLoading && (
+        <div className="loading-bar">
+          <div className="loading-bar-fill" />
+        </div>
+      )}
+
+      {/* Empty */}
+      {!historyLoading && history.length === 0 && (
+        <div className="msg msg-info">
+          No history yet. Complete a practice session first.
+        </div>
+      )}
+
+      {/* History List */}
+      <div className="history-list">
+        {history.map((h, i) => (
+          <div 
+  className="history-item" 
+  key={i}
+  onClick={() => setOpenIndex(i === openIndex ? null : i)}
+>
+
+            {/* Score */}
+            <div
+              className={`history-score ${
+                h.overall >= 8
+                  ? "score-hi"
+                  : h.overall >= 5
+                  ? "score-mid"
+                  : "score-lo"
+              }`}
+            >
+              {h.overall ? h.overall.toFixed(1) : "—"}
             </div>
-            <div className="card">
-              <div className="card-header">
-                <div className="card-title-group">
-                  <div className="card-icon blue">📊</div>
-                  <div>
-                    <div className="card-title">Past Attempts</div>
-                    <div className="card-sub">{history.length} sessions recorded</div>
-                  </div>
+
+            {/* Content */}
+            <div className="history-content">
+              <div className="history-question">
+  {h.question}
+
+  <span className="feedback-tag">
+    {h.overall >= 8 ? "Strong" :
+     h.overall >= 5 ? "Average" : "Weak"}
+  </span>
+</div>
+              {openIndex === i && (
+  <div className="history-details">
+    <p><strong>Answer:</strong> {h.answer}</p>
+  </div>
+)}
+
+              {/* Breakdown */}
+              <div className="history-breakdown">
+                <span>Tech: {h.technical ?? 0}</span>
+                <span>Depth: {h.depth ?? 0}</span>
+                <span>Clarity: {h.clarity ?? 0}</span>
+              </div>
+
+              {/* Optional: Answer preview */}
+              {h.answer && (
+                <div className="history-answer">
+                  {h.answer.slice(0, 120)}...
                 </div>
-                <button className="btn btn-outline btn-sm" onClick={fetchHistory}>↻ Refresh</button>
-              </div>
-
-              {historyLoading && <div className="loading-bar"><div className="loading-bar-fill" /></div>}
-
-              {!historyLoading && history.length === 0 && (
-                <div className="msg msg-info">No history yet. Complete a practice session first.</div>
               )}
-
-              <div className="history-list">
-                {history.map((h, i) => (
-                  <div className="history-item" key={i}>
-                    <div className={`history-score ${h.score >= 85 ? "score-hi" : h.score >= 60 ? "score-mid" : "score-lo"}`}>
-                      {h.score ?? "—"}
-                    </div>
-                    <div>
-                      <div className="history-question">{h.question}</div>
-                      <div className="history-topic">📌 {h.topic}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
-          </>
-        )}
 
+          </div>
+        ))}
+      </div>
+    </div>
+  </>
+)}
+            
         {tab === "settings" && (
           <>
             <div className="page-header">
