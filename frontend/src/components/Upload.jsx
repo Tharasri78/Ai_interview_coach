@@ -60,7 +60,6 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
     {/* Header */}
     <div className="card-header">
       <div className="card-title-group">
-        <div className="card-icon blue">📄</div>
         <div>
           <div className="card-title">Upload PDF</div>
           <div className="card-sub">

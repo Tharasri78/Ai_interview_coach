@@ -35,7 +35,6 @@ export default function Question({ disabled, onQuestion }) {
     <div className="card" style={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? "none" : "auto" }}>
       <div className="card-header">
         <div className="card-title-group">
-          <div className="card-icon blue">🎯</div>
           <div>
             <div className="card-title">Generate Question</div>
             <div className="card-sub">{disabled ? "Upload PDF first" : "Step 2 — Enter a topic"}</div>
@@ -71,7 +70,6 @@ export default function Question({ disabled, onQuestion }) {
         <div className="question-box">
           <div className="question-text">{data.question}</div>
           <div className="question-meta">
-            <span className="meta-chip chip-src"> {data.topic}</span>
           </div>
         </div>
       )}

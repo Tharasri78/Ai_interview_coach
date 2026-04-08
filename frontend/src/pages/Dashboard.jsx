@@ -9,10 +9,8 @@ import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("practice");
-
-  // Real state — each step only unlocks after previous completes
   const [isUploaded, setIsUploaded] = useState(false);
-  const [questionData, setQuestionData] = useState(null); // full question object
+  const [questionData, setQuestionData] = useState(null);
   const [history, setHistory] = useState([]);
   const [openIndex, setOpenIndex] = useState(null);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -21,7 +19,6 @@ export default function Dashboard() {
   const userName = localStorage.getItem("user_name") || "User";
   const userEmail = localStorage.getItem("user_email") || "";
 
-  // Fetch history when tab switches to history
   useEffect(() => {
     if (tab === "history") fetchHistory();
   }, [tab]);
@@ -32,7 +29,7 @@ export default function Dashboard() {
       const res = await getHistory(userId);
       setHistory(res.data || []);
     } catch {
-      setHistory([]); // fail silently, show empty state
+      setHistory([]);
     }
     setHistoryLoading(false);
   };
@@ -41,7 +38,7 @@ export default function Dashboard() {
     localStorage.removeItem("user_id");
     localStorage.removeItem("user_email");
     localStorage.removeItem("user_name");
-    navigate("/landing");
+    navigate("/");
   };
 
   const step = !isUploaded ? 1 : !questionData ? 2 : 3;
@@ -52,11 +49,19 @@ export default function Dashboard() {
     { icon: "⚙️", label: "Settings", key: "settings" },
   ];
 
+  const FeedbackTag = ({ score }) => {
+    if (score >= 8) return <span className="feedback-tag feedback-strong">Strong</span>;
+    if (score >= 5) return <span className="feedback-tag feedback-average">Average</span>;
+    return <span className="feedback-tag feedback-weak">Weak</span>;
+  };
+
   return (
     <div className="dashboard-layout">
+      {/* ── SIDEBAR (desktop) ── */}
       <aside className="sidebar">
-        <div className="sidebar-logo" onClick={() => navigate("/landing")} style={{ cursor: "pointer" }}>
-          Interview<span>AI</span>
+        <div className="sidebar-logo" onClick={() => navigate("/")}>
+          <span className="sidebar-logo-dot" />
+          Prepply
         </div>
 
         <div className="sidebar-section-label">Main</div>
@@ -81,197 +86,169 @@ export default function Dashboard() {
         </nav>
 
         <div className="sidebar-user">
-          <div className="user-avatar">{userName[0].toUpperCase()}</div>
-          <div className="user-info">
+          <div className="user-avatar">{userName[0]?.toUpperCase()}</div>
+          <div>
             <div className="user-name">{userName}</div>
-            <div className="user-role">Free Plan</div>
+            <div className="user-role"><span className="user-role-dot" /> Free Plan</div>
           </div>
         </div>
       </aside>
 
-      <main className="dashboard-main">
+      {/* ── MOBILE TOPBAR ── */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+        <div className="mobile-topbar">
+          <div className="mobile-topbar-logo">
+            <span className="mobile-topbar-logo-dot" /> Prepply
+          </div>
+          <div style={{ fontSize: "0.82rem", color: "var(--muted)", fontWeight: 500 }}>
+            {navItems.find(n => n.key === tab)?.label}
+          </div>
+          <div style={{ width: 32 }} />
+        </div>
 
-        {tab === "practice" && (
-          <>
-            <div className="page-header">
-              <h1 className="page-title">Practice Session</h1>
-              <p className="page-subtitle">Complete each step in order to start your session.</p>
-            </div>
+        {/* ── MAIN CONTENT ── */}
+        <main className="dashboard-main">
 
-            {/* REAL FLOW INDICATOR */}
-            <div className="flow-steps">
-              {[{ n: 1, label: "Upload PDF" }, { n: 2, label: "Generate Question" }, { n: 3, label: "Submit Answer" }].map((s, i) => (
-                <div key={s.n} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div className={`flow-step ${step === s.n ? "active" : step > s.n ? "done" : ""}`}>
-                    <div className="flow-step-num">{step > s.n ? "✓" : s.n}</div>
-                    {s.label}
+          {/* ─ PRACTICE TAB ─ */}
+          {tab === "practice" && (
+            <>
+              <div className="page-header">
+                <h1 className="page-title">Practice Session</h1>
+                <p className="page-subtitle">Complete each step in order to begin.</p>
+              </div>
+
+              <div className="flow-steps">
+                {[{ n: 1, label: "Upload PDF" }, { n: 2, label: "Generate Question" }, { n: 3, label: "Submit Answer" }].map((s, i) => (
+                  <div key={s.n} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div className={`flow-step ${step === s.n ? "active" : step > s.n ? "done" : ""}`}>
+                      <div className="flow-step-num">{step > s.n ? "✓" : s.n}</div>
+                      {s.label}
+                    </div>
+                    {i < 2 && <span className="flow-arrow">›</span>}
                   </div>
-                  {i < 2 && <span className="flow-arrow">→</span>}
+                ))}
+              </div>
+
+              <div className="dashboard-grid">
+                <Upload userId={userId} onUploaded={() => setIsUploaded(true)} isUploaded={isUploaded} />
+                <Question userId={userId} disabled={!isUploaded} onQuestion={(data) => setQuestionData(data)} />
+              </div>
+
+              <div style={{ marginTop: 20 }}>
+                <Answer userId={userId} questionData={questionData} disabled={!questionData} onAnswered={fetchHistory} />
+              </div>
+            </>
+          )}
+
+          {/* ─ HISTORY TAB ─ */}
+          {tab === "history" && (
+            <>
+              <div className="page-header">
+                <h1 className="page-title">Session History</h1>
+                <p className="page-subtitle">Your past questions and performance breakdown.</p>
+              </div>
+
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-title-group">
+                    <div className="card-icon blue">📊</div>
+                    <div>
+                      <div className="card-title">Past Attempts</div>
+                      <div className="card-sub">{history.length} sessions recorded</div>
+                    </div>
+                  </div>
+                  <button className="btn btn-outline btn-sm" onClick={fetchHistory}>↻ Refresh</button>
                 </div>
-              ))}
-            </div>
 
-            <div className="dashboard-grid">
-              {/* STEP 1: Upload — always available */}
-              <Upload
-                userId={userId}
-                onUploaded={() => setIsUploaded(true)}
-                isUploaded={isUploaded}
-              />
+                {historyLoading && <div className="loading-bar"><div className="loading-bar-fill" /></div>}
 
-              {/* STEP 2: Question — locked until upload done */}
-              <Question
-                userId={userId}
-                disabled={!isUploaded}
-                onQuestion={(data) => setQuestionData(data)}
-              />
-            </div>
+                {!historyLoading && history.length === 0 && (
+                  <div className="msg msg-info">No history yet. Complete a practice session first.</div>
+                )}
 
-            {/* STEP 3: Answer — locked until question generated */}
-            <div style={{ marginTop: 24 }}>
-              <Answer
-                userId={userId}
-                questionData={questionData}
-                disabled={!questionData}
-                onAnswered={fetchHistory}
-              />
-            </div>
-          </>
-        )}
+                <div className="history-list">
+                  {history.map((h, i) => (
+                    <div className="history-item" key={i} onClick={() => setOpenIndex(i === openIndex ? null : i)}>
+                      <div className={`history-score ${h.overall >= 8 ? "score-hi" : h.overall >= 5 ? "score-mid" : "score-lo"}`}>
+                        {h.overall ? h.overall.toFixed(1) : "—"}
+                      </div>
+                      <div className="history-content">
+                        <div className="history-question">
+                          {h.question}
+                          <FeedbackTag score={h.overall} />
+                        </div>
+                        {openIndex === i && (
+                          <div className="history-details">
+                            <strong>Answer:</strong> {h.answer}
+                          </div>
+                        )}
+                        <div className="history-breakdown">
+                          <span>Tech: {h.technical ?? 0}</span>
+                          <span>Depth: {h.depth ?? 0}</span>
+                          <span>Clarity: {h.clarity ?? 0}</span>
+                        </div>
+                        {h.answer && (
+                          <div className="history-answer">{h.answer.slice(0, 120)}…</div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
-            {/* HISTORY */}
-{tab === "history" && (
-  <>
-    <div className="page-header">
-      <h1 className="page-title">Session History</h1>
-      <p className="page-subtitle">Your past questions and performance breakdown.</p>
-    </div>
+          {/* ─ SETTINGS TAB ─ */}
+          {tab === "settings" && (
+            <>
+              <div className="page-header">
+                <h1 className="page-title">Settings</h1>
+                <p className="page-subtitle">Manage your account and preferences.</p>
+              </div>
+              <div className="card settings-card">
+                <div className="card-header">
+                  <div className="card-title-group">
+                    <div className="card-icon blue">⚙️</div>
+                    <div><div className="card-title">Account</div></div>
+                  </div>
+                </div>
 
-    <div className="card">
-      <div className="card-header">
-        <div className="card-title-group">
-          <div className="card-icon blue">📊</div>
-          <div>
-            <div className="card-title">Past Attempts</div>
-            <div className="card-sub">{history.length} sessions recorded</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div>
+                    <div className="field-label">Display Name</div>
+                    <input className="text-input" defaultValue={userName} />
+                  </div>
+                  <div>
+                    <div className="field-label">Email</div>
+                    <input className="text-input" defaultValue={userEmail} />
+                  </div>
+                  <div>
+                    <div className="field-label">User ID</div>
+                    <input className="text-input" value={userId} readOnly style={{ opacity: 0.5, cursor: "not-allowed" }} />
+                  </div>
+                  <hr className="settings-divider" />
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button className="btn btn-blue btn-sm">Save Changes</button>
+                    <button className="btn btn-outline btn-sm" onClick={handleLogout}>Log Out</button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </main>
+
+        {/* ── MOBILE BOTTOM NAV ── */}
+        <div className="mobile-bottom-nav">
+          <div className="mobile-bottom-nav-inner">
+            {navItems.map((item) => (
+              <div key={item.key} className={`mobile-nav-item ${tab === item.key ? "active" : ""}`} onClick={() => setTab(item.key)}>
+                <span className="mobile-nav-item-icon">{item.icon}</span>
+                {item.label}
+              </div>
+            ))}
           </div>
         </div>
-
-        <button className="btn btn-outline btn-sm" onClick={fetchHistory}>
-          ↻ Refresh
-        </button>
       </div>
-
-      {/* Loading */}
-      {historyLoading && (
-        <div className="loading-bar">
-          <div className="loading-bar-fill" />
-        </div>
-      )}
-
-      {/* Empty */}
-      {!historyLoading && history.length === 0 && (
-        <div className="msg msg-info">
-          No history yet. Complete a practice session first.
-        </div>
-      )}
-
-      {/* History List */}
-      <div className="history-list">
-        {history.map((h, i) => (
-          <div 
-  className="history-item" 
-  key={i}
-  onClick={() => setOpenIndex(i === openIndex ? null : i)}
->
-
-            {/* Score */}
-            <div
-              className={`history-score ${
-                h.overall >= 8
-                  ? "score-hi"
-                  : h.overall >= 5
-                  ? "score-mid"
-                  : "score-lo"
-              }`}
-            >
-              {h.overall ? h.overall.toFixed(1) : "—"}
-            </div>
-
-            {/* Content */}
-            <div className="history-content">
-              <div className="history-question">
-  {h.question}
-
-  <span className="feedback-tag">
-    {h.overall >= 8 ? "Strong" :
-     h.overall >= 5 ? "Average" : "Weak"}
-  </span>
-</div>`
-              {openIndex === i && (
-  <div className="history-details">
-    <p><strong>Answer:</strong> {h.answer}</p>
-  </div>
-)}
-
-              {/* Breakdown */}
-              <div className="history-breakdown">
-                <span>Tech: {h.technical ?? 0}</span>
-                <span>Depth: {h.depth ?? 0}</span>
-                <span>Clarity: {h.clarity ?? 0}</span>
-              </div>
-
-              {/* Optional: Answer preview */}
-              {h.answer && (
-                <div className="history-answer">
-                  {h.answer.slice(0, 120)}...
-                </div>
-              )}
-            </div>
-
-          </div>
-        ))}
-      </div>
-    </div>
-  </>
-)}
-            
-        {tab === "settings" && (
-          <>
-            <div className="page-header">
-              <h1 className="page-title">Settings</h1>
-              <p className="page-subtitle">Manage your account.</p>
-            </div>
-            <div className="card" style={{ maxWidth: 500 }}>
-              <div className="card-header">
-                <div className="card-title-group">
-                  <div className="card-icon blue">⚙️</div>
-                  <div><div className="card-title">Account Settings</div></div>
-                </div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                <div>
-                  <div className="field-label">Display Name</div>
-                  <input className="text-input" defaultValue={userName} />
-                </div>
-                <div>
-                  <div className="field-label">Email</div>
-                  <input className="text-input" defaultValue={userEmail} />
-                </div>
-                <div>
-                  <div className="field-label">User ID</div>
-                  <input className="text-input" value={userId} readOnly
-                    style={{ opacity: 0.5, cursor: "not-allowed" }} />
-                </div>
-                <div style={{ display: "flex", gap: 10 }}>
-                  <button className="btn btn-blue btn-sm">Save Changes</button>
-                  <button className="btn btn-outline btn-sm" onClick={handleLogout}>Log Out</button>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-      </main>
     </div>
   );
 }

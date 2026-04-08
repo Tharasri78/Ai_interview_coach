@@ -16,7 +16,6 @@ export default function Answer({ questionData, disabled, onAnswered }) {
   }, [questionData]);
 
   const submit = async () => {
-    // ✅ FIX: added questionData check
     if (!answer.trim() || disabled || !questionData) return;
 
     setLoading(true);
@@ -26,7 +25,6 @@ export default function Answer({ questionData, disabled, onAnswered }) {
     try {
       const res = await submitAnswer(userId, questionData.question, answer);
 
-      // ✅ FIX: handle backend error response
       if (res.data.error) {
         setError(res.data.error);
         setLoading(false);
@@ -47,7 +45,6 @@ export default function Answer({ questionData, disabled, onAnswered }) {
     setLoading(false);
   };
 
-  // ✅ FIX: safer score extraction
 const score = Math.round(result?.scores?.overall ?? result?.score ?? 0);
 const percentage = score * 10; // convert /10 → /100 for UI
 
@@ -70,7 +67,6 @@ const percentage = score * 10; // convert /10 → /100 for UI
     >
       <div className="card-header">
         <div className="card-title-group">
-          <div className="card-icon purple">✍️</div>
           <div>
             <div className="card-title">Submit Your Answer</div>
             <div className="card-sub">
