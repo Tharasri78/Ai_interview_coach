@@ -9,15 +9,21 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
   const inputRef = useRef();
 
   const handleFile = (f) => {
-    if (f?.type === "application/pdf") {
-      setFile(f);
-      setStatus(null);
-      setMsg("");
-    } else {
-      setMsg("Please select a valid PDF file.");
-      setStatus("error");
-    }
-  };
+  if (f?.type === "application/pdf") {
+    setFile(f);
+
+    // 🔥 CRITICAL FIX
+    setStatus(null);
+    setMsg("");
+
+    // 🔥 RESET DASHBOARD FLOW
+    onUploaded(false);  // 👈 THIS FIXES YOUR ISSUE
+
+  } else {
+    setMsg("Please select a valid PDF file.");
+    setStatus("error");
+  }
+};
 
   const handleUpload = async () => {
     if (!file) return;
@@ -32,14 +38,17 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
     try {
   const res = await uploadPDF(userId, formData);
 
-  if (res.data?.message) {
-    setMsg("File Uploaded.");
-    setStatus("success");
-    onUploaded();
-  } else {
-    setMsg("Upload failed.");
-    setStatus("error");
-  }
+  if (res.data?.status === "success") {
+  setMsg("File Uploaded.");
+  setStatus("success");
+
+  onUploaded(true);  
+} else {
+  setMsg("Upload failed.");
+  setStatus("error");
+
+  onUploaded(false);
+}
 
 } catch (err) {
    console.error("UPLOAD ERROR:", err); 
@@ -104,7 +113,7 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
       <div style={{ marginTop: 12 }}>
         <button
           onClick={handleUpload}
-          disabled={loading || isUploaded}
+          disabled={loading || !file}
           className="btn btn-primary btn-full"
         >
           {loading ? "Uploading..." : "Upload & Process"}

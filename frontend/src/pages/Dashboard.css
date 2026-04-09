@@ -468,3 +468,38 @@ body {
   .flow-step { font-size: 0.78rem; }
   .card { padding: 18px; }
 }
+.feedback-block {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.feedback-block p {
+  margin: 6px 0;
+  color: #374151;
+}
+
+.feedback-block.ideal {
+  background: #EEF2FF;
+  border-left: 4px solid #4F46E5;
+}
+.error-box {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fff5f5;
+  border: 1px solid #f5c2c2;
+}
+
+.error-title {
+  color: #d92d20;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.error-sub {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #7a271a;
+}

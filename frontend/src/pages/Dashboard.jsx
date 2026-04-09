@@ -41,6 +41,7 @@ export default function Dashboard() {
     navigate("/");
   };
 
+  // ✅ step logic now correct
   const step = !isUploaded ? 1 : !questionData ? 2 : 3;
 
   const navItems = [
@@ -57,7 +58,8 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-layout">
-      {/* ── SIDEBAR (desktop) ── */}
+
+      {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="sidebar-logo" onClick={() => navigate("/")}>
           <span className="sidebar-logo-dot" />
@@ -67,9 +69,11 @@ export default function Dashboard() {
         <div className="sidebar-section-label">Main</div>
         <nav className="sidebar-nav">
           {navItems.map((item) => (
-            <div key={item.key}
+            <div
+              key={item.key}
               className={`sidebar-item ${tab === item.key ? "active" : ""}`}
-              onClick={() => setTab(item.key)}>
+              onClick={() => setTab(item.key)}
+            >
               <span className="sidebar-item-icon">{item.icon}</span>
               {item.label}
               {item.key === "history" && history.length > 0 && (
@@ -94,8 +98,9 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* ── MOBILE TOPBAR ── */}
+      {/* MAIN */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+
         <div className="mobile-topbar">
           <div className="mobile-topbar-logo">
             <span className="mobile-topbar-logo-dot" /> Prepply
@@ -106,10 +111,9 @@ export default function Dashboard() {
           <div style={{ width: 32 }} />
         </div>
 
-        {/* ── MAIN CONTENT ── */}
         <main className="dashboard-main">
 
-          {/* ─ PRACTICE TAB ─ */}
+          {/* PRACTICE */}
           {tab === "practice" && (
             <>
               <div className="page-header">
@@ -117,6 +121,7 @@ export default function Dashboard() {
                 <p className="page-subtitle">Complete each step in order to begin.</p>
               </div>
 
+              {/* STEP FLOW */}
               <div className="flow-steps">
                 {[{ n: 1, label: "Upload PDF" }, { n: 2, label: "Generate Question" }, { n: 3, label: "Submit Answer" }].map((s, i) => (
                   <div key={s.n} style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -130,17 +135,38 @@ export default function Dashboard() {
               </div>
 
               <div className="dashboard-grid">
-                <Upload userId={userId} onUploaded={() => setIsUploaded(true)} isUploaded={isUploaded} />
-                <Question userId={userId} disabled={!isUploaded} onQuestion={(data) => setQuestionData(data)} />
+
+                {/* ✅ FIXED HERE */}
+                <Upload
+                  userId={userId}
+                  isUploaded={isUploaded}
+                  onUploaded={(status) => {
+                    setIsUploaded(status);   // 🔥 now REAL state
+                    if (!status) {
+                      setQuestionData(null); // reset if new file selected
+                    }
+                  }}
+                />
+
+                <Question
+                  userId={userId}
+                  disabled={!isUploaded}
+                  onQuestion={(data) => setQuestionData(data)}
+                />
               </div>
 
               <div style={{ marginTop: 20 }}>
-                <Answer userId={userId} questionData={questionData} disabled={!questionData} onAnswered={fetchHistory} />
+                <Answer
+                  userId={userId}
+                  questionData={questionData}
+                  disabled={!questionData}
+                  onAnswered={fetchHistory}
+                />
               </div>
             </>
           )}
 
-          {/* ─ HISTORY TAB ─ */}
+          {/* HISTORY */}
           {tab === "history" && (
             <>
               <div className="page-header">
@@ -198,13 +224,14 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* ─ SETTINGS TAB ─ */}
+          {/* SETTINGS unchanged */}
           {tab === "settings" && (
             <>
               <div className="page-header">
                 <h1 className="page-title">Settings</h1>
                 <p className="page-subtitle">Manage your account and preferences.</p>
               </div>
+
               <div className="card settings-card">
                 <div className="card-header">
                   <div className="card-title-group">
@@ -226,7 +253,9 @@ export default function Dashboard() {
                     <div className="field-label">User ID</div>
                     <input className="text-input" value={userId} readOnly style={{ opacity: 0.5, cursor: "not-allowed" }} />
                   </div>
+
                   <hr className="settings-divider" />
+
                   <div style={{ display: "flex", gap: 10 }}>
                     <button className="btn btn-blue btn-sm">Save Changes</button>
                     <button className="btn btn-outline btn-sm" onClick={handleLogout}>Log Out</button>
@@ -237,11 +266,13 @@ export default function Dashboard() {
           )}
         </main>
 
-        {/* ── MOBILE BOTTOM NAV ── */}
+        {/* MOBILE NAV */}
         <div className="mobile-bottom-nav">
           <div className="mobile-bottom-nav-inner">
             {navItems.map((item) => (
-              <div key={item.key} className={`mobile-nav-item ${tab === item.key ? "active" : ""}`} onClick={() => setTab(item.key)}>
+              <div key={item.key}
+                className={`mobile-nav-item ${tab === item.key ? "active" : ""}`}
+                onClick={() => setTab(item.key)}>
                 <span className="mobile-nav-item-icon">{item.icon}</span>
                 {item.label}
               </div>

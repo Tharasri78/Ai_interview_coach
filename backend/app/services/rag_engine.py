@@ -9,11 +9,15 @@ from groq import Groq
 
 load_dotenv()
 
-PRIMARY_MODEL = "llama-3.3-70b-versatile"
-FALLBACK_MODEL = "llama-3.1-8b-instant"
-
+PRIMARY_MODEL = "llama-3.1-8b-instant"
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
+# 🔥 LOAD EMBEDDINGS ONCE (IMPORTANT)
+embeddings = HuggingFaceEmbeddings(
+    model_name="all-MiniLM-L6-v2",
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": False}
+)
 
 # ---------- LLM ----------
 def call_llm(prompt):
@@ -21,20 +25,28 @@ def call_llm(prompt):
         res = client.chat.completions.create(
             model=PRIMARY_MODEL,
             messages=[{"role": "user", "content": prompt}],
+            timeout=5
         )
         return res.choices[0].message.content
-    except:
-        res = client.chat.completions.create(
-            model=FALLBACK_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return res.choices[0].message.content
+    except Exception as e:
+        print("LLM ERROR:", str(e))
+        return "OUT_OF_CONTEXT"
 
 
 # ---------- PDF ----------
 def load_pdf(file_path):
     reader = PdfReader(file_path)
-    return "".join([p.extract_text() or "" for p in reader.pages])
+    text = ""
+
+    for page in reader.pages:
+        t = page.extract_text()
+        if t:
+            text += t
+
+    if not text.strip():
+        raise ValueError("PDF has no readable text")
+
+    return text
 
 
 def split_text(text):
@@ -56,15 +68,13 @@ def create_or_update_vector_store(user_id, pdf_path):
     text = load_pdf(pdf_path)
     chunks = split_text(text)
 
-    docs = [
-        Document(
-            page_content=chunk,
-            metadata={"source": f"chunk_{i}"}
-        )
-        for i, chunk in enumerate(chunks)
-    ]
+    print("TEXT LENGTH:", len(text))
+    print("CHUNKS:", len(chunks))
 
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    docs = [
+        Document(page_content=c, metadata={"id": i})
+        for i, c in enumerate(chunks)
+    ]
 
     try:
         vs = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
@@ -81,55 +91,60 @@ def load_vector_store(user_id):
     if not os.path.exists(db_path):
         return None
 
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     return FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
 
 
 # ---------- RETRIEVAL ----------
-def retrieve_docs(vs, query, k=6):
+def retrieve_docs(vs, query, k=5):
     results = vs.similarity_search_with_score(query, k=k)
 
     if not results:
-        return []
+        return [], "none"
 
-    results = sorted(results, key=lambda x: x[1])
-    docs = [doc for doc, score in results[:4]]
+    docs = [doc for doc, score in results]
+    best_score = results[0][1]
 
-    return docs
+    # 🔥 RELAXED THRESHOLDS (IMPORTANT FIX)
+    if best_score < 0.8:
+        return docs[:3], "strong"
+    elif best_score < 2.0:
+        return docs[:2], "weak"
+    else:
+        # 🔥 fallback → still return docs (fix for "java")
+        return docs[:2], "weak"
 
 
 # ---------- CONFIDENCE ----------
-def compute_confidence(num_docs):
-    if num_docs >= 4:
+def compute_confidence(n):
+    if n >= 3:
         return "high"
-    elif num_docs >= 2:
+    elif n >= 2:
         return "medium"
-    else:
-        return "low"
+    return "low"
 
 
 # ---------- QUESTION ----------
 def generate_question(topic, docs, difficulty):
     if not docs:
-        return "No relevant content found"
+        return "OUT_OF_CONTEXT"
 
-    context = "\n\n".join([d.page_content for d in docs])
+    context = "\n\n".join([d.page_content[:100] for d in docs])
 
     prompt = f"""
-STRICT MODE
+You are an interview question generator.
 
 Topic: {topic}
-Difficulty: {difficulty}
 
 Context:
 {context}
 
-Rules:
-- Use ONLY context
-- No hallucination
-- Keep under 20 words
+RULES:
+- Use ONLY the context
+- If somewhat related → still generate question
+- If totally unrelated → return OUT_OF_CONTEXT
+- Keep it clear and interview-style
 
-Return ONLY question.
+Return ONLY the question.
 """
 
     return call_llm(prompt)
@@ -140,10 +155,10 @@ def evaluate_answer(question, answer, docs):
     if not docs:
         return None
 
-    context = "\n\n".join([d.page_content for d in docs])
+    context = "\n\n".join([d.page_content[:200] for d in docs])
 
     prompt = f"""
-STRICT MODE (VERY IMPORTANT)
+You are an interview evaluator.
 
 Question: {question}
 Answer: {answer}
@@ -151,31 +166,24 @@ Answer: {answer}
 Reference:
 {context}
 
-STRICT RULES (MUST FOLLOW):
-- If answer is less than 8 words → overall MUST be <= 3
-- If answer is only definition without explanation → overall MUST be <= 5
-- If answer does NOT explain how it works → max overall = 4
-- ONLY detailed answers with explanation can score above 7
-- DO NOT give high score for keyword matching
+Evaluate fairly.
 
-Bad Answer Example:
-"keygen is a function" → score should be 2–3
+Rules:
+- Reward partial correctness
+- Do NOT be overly strict
+- Accept short answers if correct
 
-Scoring Guide (0–10):
-- 9–10: complete + detailed + technical explanation
-- 7–8: good explanation but minor missing
-- 5–6: basic idea only
-- 3–4: shallow / incomplete
-- 0–2: wrong or useless
+Return JSON:
 
-Return ONLY JSON:
 {{
- "technical": number,
- "depth": number,
- "clarity": number,
- "overall": number,
- "feedback": "short feedback",
- "missing": "key missing points"
+  "technical": 0,
+  "depth": 0,
+  "clarity": 0,
+  "feedback": {{
+    "issues": "",
+    "missing": "",
+    "ideal": ""
+  }}
 }}
 """
 

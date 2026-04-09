@@ -2,14 +2,16 @@ import os
 import shutil
 import json
 import re
+import threading
 
 from fastapi import APIRouter, UploadFile, File, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from passlib.context import CryptContext
+from pydantic import BaseModel
+
 from app.db.models import User, Answer
 from app.db.database import SessionLocal
-from passlib.context import CryptContext
-
 
 from app.services.rag_engine import (
     create_or_update_vector_store,
@@ -19,17 +21,11 @@ from app.services.rag_engine import (
     retrieve_docs,
     compute_confidence
 )
+
 from app.services.adaptive import get_next_difficulty
 
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def hash_password(password):
-    return pwd_context.hash(password)
-
-def verify_password(plain, hashed):
-    return pwd_context.verify(plain, hashed)
 router = APIRouter()
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ---------- DB ----------
@@ -47,122 +43,172 @@ def get_user_avg_score(db, user_id):
     ).scalar() or 0
 
 
-# ---------- SAFE JSON ----------
+# ---------- JSON PARSER ----------
 def safe_parse_json(text):
     try:
         match = re.search(r'\{.*\}', text, re.DOTALL)
         if match:
-            return json.loads(match.group())
-    except:
-        pass
+            parsed = json.loads(match.group())
+            if all(k in parsed for k in ["technical", "depth", "clarity"]):
+                return parsed
+    except Exception as e:
+        print("PARSE ERROR:", e)
+    return None
 
-    return {
-        "technical": 0,
-        "depth": 0,
-        "clarity": 0,
-        "overall": 0,
-        "feedback": "Parsing failed",
-        "missing": ""
-    }
 
 # ---------- AUTH ----------
+def hash_password(password):
+    return pwd_context.hash(password)
+
+
+def verify_password(plain, hashed):
+    return pwd_context.verify(plain, hashed)
+
+
 @router.post("/signup/")
 async def signup(name: str, email: str, password: str, db: Session = Depends(get_db)):
     if "@" not in email or len(password) < 6:
         return {"error": "Invalid email or weak password"}
-    user = db.query(User).filter(User.email == email).first()
-    
-    if user:
+
+    if db.query(User).filter(User.email == email).first():
         return {"error": "User already exists"}
 
-    new_user = User(
+    user = User(
         name=name,
         email=email,
         password=hash_password(password)
     )
 
-    db.add(new_user)
+    db.add(user)
     db.commit()
-    db.refresh(new_user)
+    db.refresh(user)
 
     return {
-        "user_id": new_user.id,
-        "name": new_user.name,
-        "email": new_user.email
+        "user_id": user.id,
+        "name": user.name,
+        "email": user.email
     }
+
 
 @router.post("/login/")
 async def login(email: str, password: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == email).first()
 
     if not user or not verify_password(password, user.password):
-       return {"error": "Invalid credentials"}
+        return {"error": "Invalid credentials"}
 
     return {
         "user_id": user.id,
         "name": user.name,
         "email": user.email
-    }    
-# ---------- UPLOAD PDF ----------
+    }
 
+
+# ---------- UPLOAD ----------
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+def process_pdf_async(user_id, file_path):
+    try:
+        from app.services.rag_engine import create_or_update_vector_store
+        create_or_update_vector_store(user_id, file_path)
+        print("VECTOR DB READY:", user_id)
+    except Exception as e:
+        print("BACKGROUND ERROR:", str(e))
+
 
 @router.post("/upload-pdf/")
 async def upload_pdf(user_id: int, file: UploadFile = File(...)):
     try:
-        print("UPLOAD HIT:", user_id)
-
         file_path = f"{UPLOAD_DIR}/{user_id}_{file.filename}"
 
-        
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        print("FILE SAVED:", file_path)
-
-        import threading
+        # 🔥 async processing
         threading.Thread(
-            target=create_or_update_vector_store,
-            args=(user_id, file_path)
+            target=process_pdf_async,
+            args=(user_id, file_path),
+            daemon=True
         ).start()
 
         return {
             "status": "success",
-            "message": "PDF uploaded. Processing in background."
+            "message": "File uploaded. Processing started."
         }
 
     except Exception as e:
         print("UPLOAD ERROR:", str(e))
         return {"error": "Upload failed"}
-    
+
+
 # ---------- GENERATE QUESTION ----------
 @router.get("/generate-question/")
 async def generate_question_api(user_id: int, topic: str, db: Session = Depends(get_db)):
+
     vs = load_vector_store(user_id)
 
     if not vs:
-        return {"error": "No knowledge base"}
+        return {"error": "Upload and process a PDF first"}
 
-    docs = retrieve_docs(vs, topic)
+    topic = topic.lower().strip()
 
-    if not docs:
-        return {"error": "No relevant content"}
+    # 🔥 FAST CHECK (instant response)
+    docs, match_type = retrieve_docs(vs, topic)
+
+    if match_type == "none":
+        return {"error": "Try topics related to your uploaded PDF"}
+
+    # 🔥 MULTI QUERY (only if relevant)
+    queries = [
+        topic,
+        f"{topic} concepts",
+        f"explain {topic}",
+        f"{topic} definition"
+    ]
+
+    all_docs = []
+    final_match = match_type
+
+    for q in queries:
+        docs_q, match_q = retrieve_docs(vs, q)
+
+        if match_q == "strong":
+            final_match = "strong"
+        elif match_q == "weak" and final_match != "strong":
+            final_match = "weak"
+
+        if docs_q:
+            all_docs.extend(docs_q)
+
+    # 🔥 REMOVE DUPLICATES
+    seen = set()
+    unique_docs = []
+
+    for d in all_docs:
+        if d.page_content not in seen:
+            unique_docs.append(d)
+            seen.add(d.page_content)
+
+    docs = unique_docs[:3]
 
     difficulty = get_next_difficulty(get_user_avg_score(db, user_id))
+
     q = generate_question(topic, docs, difficulty)
+
+    if "OUT_OF_CONTEXT" in q:
+        return {"error": "Try topics related to your uploaded PDF"}
 
     return {
         "question": q,
         "difficulty": difficulty,
-        "source": docs[0].page_content[:200],
-        "confidence": compute_confidence(len(docs))
+        "confidence": compute_confidence(len(docs)),
+        "fallback": final_match == "weak"
     }
 
 
 # ---------- SUBMIT ANSWER ----------
-from pydantic import BaseModel
-
 class AnswerRequest(BaseModel):
     user_id: int
     question: str
@@ -177,29 +223,24 @@ async def submit_answer(data: AnswerRequest, db: Session = Depends(get_db)):
     if not vs:
         return {"error": "No knowledge base"}
 
-    docs = retrieve_docs(vs, data.question)
+    docs, match_type = retrieve_docs(vs, data.question)
 
-    if not docs:
-        return {"error": "No relevant content for evaluation"}
+    if match_type == "none":
+        return {"error": "Try topics related to your uploaded PDF"}
 
     raw = evaluate_answer(data.question, data.answer, docs)
-
     scores = safe_parse_json(raw)
-    answer_words = len(data.answer.strip().split())
 
-#  HARD PENALTY RULES
-    if answer_words <= 2:
-        scores["overall"] = min(scores["overall"], 2)
+    if not scores:
+        raw = evaluate_answer(data.question, data.answer, docs)
+        scores = safe_parse_json(raw)
 
-    elif answer_words <= 6:
-        scores["overall"] = min(scores["overall"], 4)
+    if not scores:
+        return {"error": "Evaluation failed. Try again."}
 
-    elif answer_words <= 12:
-        scores["overall"] = min(scores["overall"], 6)
-
-    
-    if not any(word in data.answer.lower() for word in ["because", "used", "helps", "means", "by", "so that"]):
-        scores["overall"] = min(scores["overall"], 5)
+    scores["overall"] = round(
+        (scores["technical"] + scores["depth"] + scores["clarity"]) / 3, 1
+    )
 
     db.add(Answer(
         user_id=data.user_id,
@@ -214,11 +255,11 @@ async def submit_answer(data: AnswerRequest, db: Session = Depends(get_db)):
 
     return {
         "scores": scores,
-        "feedback": scores.get("feedback", ""),
-        "missing": scores.get("missing", ""),
-        "source": docs[0].page_content[:200],
-        "confidence": compute_confidence(len(docs))
+        "feedback": scores.get("feedback", {}),
+        "confidence": compute_confidence(len(docs)),
+        "match_type": match_type
     }
+
 
 # ---------- HISTORY ----------
 @router.get("/history/{user_id}")
@@ -231,13 +272,13 @@ async def get_history(user_id: int, db: Session = Depends(get_db)):
     )
 
     return [
-    {
-        "question": a.question,
-        "answer": a.answer,
-        "technical": a.technical,
-        "depth": a.depth,
-        "clarity": a.clarity,
-        "overall": a.overall
-    }
-    for a in answers
-]
+        {
+            "question": a.question,
+            "answer": a.answer,
+            "technical": a.technical,
+            "depth": a.depth,
+            "clarity": a.clarity,
+            "overall": a.overall
+        }
+        for a in answers
+    ]
