@@ -18,8 +18,12 @@ export default function Auth() {
       let res;
       if (mode === "signup") res = await signupUser(name || "User", email, password);
       else res = await loginUser(email, password);
-      if (res.data.error) { alert(res.data.error); setLoading(false); return; }
-      localStorage.setItem("user_id", res.data.user_id);
+      if (!res.data.user_id) {
+  alert("Invalid response from server");
+  return;
+}
+
+localStorage.setItem("user_id", res.data.user_id);
       localStorage.setItem("user_name", res.data.name);
       localStorage.setItem("user_email", res.data.email);
       navigate("/dashboard");

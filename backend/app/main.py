@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.api.routes import upload, question, answer, history, auth
 from app.db.database import Base, engine
-from app.routes import interview
+
+#  IMPORT ALL ROUTES PROPERLY
+from app.api.routes import upload, question, answer, history
 
 app = FastAPI()
 
-# ✅ CORS MUST BE FIRST
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -19,7 +21,11 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 # ROUTES
-app.include_router(interview.router)
+app.include_router(auth.router)
+app.include_router(upload.router)
+app.include_router(question.router)
+app.include_router(answer.router)
+app.include_router(history.router)
 
 
 @app.get("/")

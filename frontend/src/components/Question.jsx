@@ -8,113 +8,78 @@ export default function Question({ disabled, onQuestion }) {
   const [error, setError] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
 
-  const userId = localStorage.getItem("user_id");
+  const userId = Number(localStorage.getItem("user_id"));
 
   const generate = async () => {
+    if (!userId) {
+  setError("User not logged in. Please login again.");
+  return;
+} 
     if (!topic.trim() || disabled) return;
 
     setLoading(true);
     setData(null);
     setError("");
-    setStatusMsg("⏳ Checking topic relevance...");
+    setStatusMsg("⏳ Generating question...");
 
     try {
       const res = await generateQuestion(userId, topic);
 
-      // 🔥 CLEAR loading message immediately after response
-      setStatusMsg("");
+      const response = res.data;
 
-      // 🔴 BACKEND ERROR
-      if (res.data.error) {
-        setError(res.data.error);
-        setLoading(false);
-        return;
-      }
+      setData(response);
+      onQuestion(response);
 
-      // ✅ SUCCESS
-      setData(res.data);
-      onQuestion(res.data);
-
-      if (res.data.fallback) {
-        setError("⚠ Showing a related question from your PDF. Try refining your topic.");
+      if (response.fallback) {
+        setError("⚠ Showing a general question (not from your PDF)");
       } else {
         setError("");
       }
 
     } catch (err) {
-      setStatusMsg(""); // clear loading
-      setError("Try topics related to your uploaded PDF");
+      setError("Try a different topic.");
     }
 
     setLoading(false);
+    setStatusMsg("");
   };
 
   return (
-    <div
-      className="card"
-      style={{
-        opacity: disabled ? 0.5 : 1,
-        pointerEvents: disabled ? "none" : "auto"
-      }}
-    >
+    <div className="card" style={{ opacity: disabled ? 0.5 : 1 }}>
+      
       <div className="card-header">
-        <div className="card-title-group">
-          <div>
-            <div className="card-title">Generate Question</div>
-            <div className="card-sub">
-              {disabled ? "Upload PDF first" : "Step 2 — Enter a topic"}
-            </div>
+        <div>
+          <div className="card-title">Generate Question</div>
+          <div className="card-sub">
+            {disabled ? "Upload PDF first" : "Step 2 — Enter a topic"}
           </div>
         </div>
         {data && <span className="card-badge badge-info">Ready</span>}
       </div>
 
-      {loading && (
-        <div className="loading-bar">
-          <div className="loading-bar-fill" />
-        </div>
-      )}
+      {loading && <div className="loading-bar"><div className="loading-bar-fill" /></div>}
 
       <div className="field-label">Topic</div>
-
       <div className="input-group">
         <input
           className="text-input"
-          placeholder="e.g. Neural Networks, Binary Search..."
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && generate()}
           disabled={disabled}
         />
-
-        <button
-          className="btn btn-blue"
-          onClick={generate}
-          disabled={loading || !topic.trim() || disabled}
-        >
+        <button className="btn btn-blue" onClick={generate} disabled={loading || disabled}>
           {loading ? "..." : "Generate"}
         </button>
       </div>
 
-      {/* 🟢 STATUS (ONLY DURING LOADING) */}
-      {statusMsg && (
-        <div className="msg msg-info" style={{ marginTop: 12 }}>
-          {statusMsg}
-        </div>
-      )}
+      {statusMsg && <div className="msg msg-info">{statusMsg}</div>}
 
-      {/* 🔴 ERROR */}
-      {error && !statusMsg && (
-        <div className="error-box">
-          <div className="error-sub">{error}</div>
-        </div>
-      )}
+      {error && <div className="error-box"><div>{error}</div></div>}
 
-      {/* ✅ RESULT */}
       {data && (
         <div className="question-box">
           <div className="question-text">{data.question}</div>
-          <div className="question-meta"></div>
         </div>
       )}
     </div>

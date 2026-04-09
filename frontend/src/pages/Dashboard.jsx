@@ -136,17 +136,13 @@ export default function Dashboard() {
 
               <div className="dashboard-grid">
 
-                {/* ✅ FIXED HERE */}
                 <Upload
-                  userId={userId}
-                  isUploaded={isUploaded}
-                  onUploaded={(status) => {
-                    setIsUploaded(status);   // 🔥 now REAL state
-                    if (!status) {
-                      setQuestionData(null); // reset if new file selected
-                    }
-                  }}
-                />
+  userId={userId}
+  onUploaded={(status) => {
+    setIsUploaded(status);
+    if (!status) setQuestionData(null);
+  }}
+/>
 
                 <Question
                   userId={userId}

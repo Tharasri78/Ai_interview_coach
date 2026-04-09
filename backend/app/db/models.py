@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, Text
+from sqlalchemy import Column, Integer, String, Float, Text, DateTime
+from datetime import datetime
 from .database import Base
 
 
@@ -8,7 +9,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     email = Column(String, unique=True, index=True)
-    password = Column(String)  
+    password = Column(String)
 
 
 class UserProfile(Base):
@@ -32,3 +33,5 @@ class Answer(Base):
     depth = Column(Float)
     clarity = Column(Float)
     overall = Column(Float)
+
+    created_at = Column(DateTime, default=datetime.utcnow) 
