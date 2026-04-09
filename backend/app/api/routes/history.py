@@ -13,9 +13,8 @@ def get_db():
         db.close()
 
 
-@router.get("/history/")
+@router.get("/history/{user_id}")
 def get_history(user_id: int, db: Session = Depends(get_db)):
-
     records = db.query(Answer)\
         .filter(Answer.user_id == user_id)\
         .order_by(Answer.created_at.desc())\

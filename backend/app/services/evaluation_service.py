@@ -44,21 +44,20 @@ Be strict:
 DO NOT return anything except JSON.
 """
 
-    result = generate_text(prompt, temperature=0.3, max_tokens=250)
+    result = generate_text(prompt, temperature=0.3, max_tokens=250,  task="evaluation")
 
+    if not result:
+     return {
+        "error": "LLM failed",
+        "scores": None,
+        "feedback": None
+    }
     try:
         return json.loads(result)
-    except:
+    except Exception as e:
+        print("JSON PARSE ERROR:", result)
         return {
-            "scores": {
-                "technical": 3,
-                "depth": 3,
-                "clarity": 3,
-                "overall": 3
-            },
-            "feedback": {
-                "issues": "Evaluation failed.",
-                "missing": "Could not analyze answer.",
-                "ideal": "Provide a structured explanation with examples."
-            }
-        }
+            "error": "Invalid LLM response",
+            "scores": None,
+            "feedback": None
+    }

@@ -10,7 +10,7 @@ router = APIRouter()
 
 @router.get("/generate-question/")
 async def generate_question_api(user_id: int, topic: str, db: Session = Depends(get_db)):
-
+    topic = topic.lower().strip()   
     vs = load_vector_store(user_id)
 
     topic = topic.lower().strip()

@@ -22,7 +22,12 @@ async def submit_answer_api(data: dict, db: Session = Depends(get_db)):
     answer = data.get("answer")
 
     result = evaluate_answer(question, answer)
-    scores = result.get("scores", {})
+    if not result or not result.get("scores"):
+      return {
+        "error": "Evaluation failed. Try again."
+    }
+
+    scores = result["scores"]
 
     new_entry = Answer(
         user_id=user_id,
