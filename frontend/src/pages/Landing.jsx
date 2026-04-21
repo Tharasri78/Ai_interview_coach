@@ -25,20 +25,60 @@ export default function Landing() {
   }, []);
 
   const features = [
-    { n: "01", title: "Document-grounded questions", desc: "Every question is retrieved from your uploaded PDF using RAG. No generic banks, no filler." },
-    { n: "02", title: "Evaluated against source", desc: "Your answer is scored by comparing it to the original content — not a generic rubric." },
-    { n: "03", title: "Identifies what you missed", desc: "Prepply tells you which specific points were absent from your answer so you can target gaps." },
-    { n: "04", title: "Topic-focused sessions", desc: "Enter any topic from your document and get a question scoped precisely to that subject." },
-    { n: "05", title: "Adaptive difficulty", desc: "Questions adjust based on your performance across the session using the next-question API." },
-    { n: "06", title: "Session history", desc: "Every attempt is recorded. Review your scores, track improvement, and revisit hard questions." },
-  ];
+  {
+    n: "01",
+    title: "Skill-based questions",
+    desc: "Questions are generated based on your selected topic and extracted skills."
+  },
+  {
+    n: "02",
+    title: "AI answer evaluation",
+    desc: "Your answers are scored on technical accuracy, depth, and clarity."
+  },
+  {
+    n: "03",
+    title: "Gap identification",
+    desc: "Understand exactly where your answer lacks depth or clarity."
+  },
+  {
+    n: "04",
+    title: "Topic-focused practice",
+    desc: "Practice specific topics instead of random interview questions."
+  },
+  {
+    n: "05",
+    title: "Adaptive difficulty",
+    desc: "Difficulty adjusts based on your performance during the session."
+  },
+  {
+    n: "06",
+    title: "Performance tracking",
+    desc: "Track your scores and improvement across sessions."
+  },
+];
 
   const steps = [
-    { n: "1", title: "Upload your document", desc: "Drop in a PDF — notes, a chapter, a job description. Prepply indexes it immediately." },
-    { n: "2", title: "Choose a topic", desc: "Type any topic from your material. Prepply retrieves the most relevant content." },
-    { n: "3", title: "Answer the question", desc: "Write your response in your own words. No multiple choice — real open-ended answers." },
-    { n: "4", title: "Get scored instantly", desc: "See your score, read detailed feedback, and find out exactly what you missed." },
-  ];
+  {
+    n: "1",
+    title: "Upload your resources",
+    desc: "Extract skills automatically to personalize your practice."
+  },
+  {
+    n: "2",
+    title: "Choose a topic",
+    desc: "Select the area you want to practice."
+  },
+  {
+    n: "3",
+    title: "Answer questions",
+    desc: "Respond with your own explanation — no MCQs."
+  },
+  {
+    n: "4",
+    title: "Get AI feedback",
+    desc: "Receive scores and insights to improve your answers."
+  },
+];
 
   return (
     <div>
@@ -71,8 +111,8 @@ export default function Landing() {
         </h1>
 
         <p className="hero-sub">
-          Upload any document — lecture notes, textbooks, job descriptions.
-          Prepply generates precise questions from your content and evaluates every answer.
+         Practice with targeted interview questions based on your skills and topics.
+Get instant AI feedback on every answer.
         </p>
 
         <div className="hero-actions">
@@ -84,22 +124,7 @@ export default function Landing() {
           </button>
         </div>
 
-        <div className="hero-proof">
-          <div className="proof-stat">
-            <div className="proof-num">RAG</div>
-            <div className="proof-label">Grounded answers only</div>
-          </div>
-          <div className="proof-divider" />
-          <div className="proof-stat">
-            <div className="proof-num">0</div>
-            <div className="proof-label">Hallucinated questions</div>
-          </div>
-          <div className="proof-divider" />
-          <div className="proof-stat">
-            <div className="proof-num">Real‑time</div>
-            <div className="proof-label">Scored feedback</div>
-          </div>
-        </div>
+       
       </section>
 
       <hr className="section-divider" />
@@ -146,7 +171,7 @@ export default function Landing() {
       {/* CALLOUT */}
       <div className="callout-section">
         <div className="callout-inner fade-up">
-          <p className="callout-quote">"The only AI prep tool that actually reads your notes — not the internet."</p>
+          <p className="callout-quote">"Focused interview practice with real-time AI feedback."</p>
           <p className="callout-attr">Designed for students, engineers, and anyone who prepares seriously.</p>
         </div>
       </div>

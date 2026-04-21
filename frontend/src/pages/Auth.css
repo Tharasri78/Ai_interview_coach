@@ -210,3 +210,34 @@ body {
   .auth-mobile-logo { display: flex; }
   .auth-card { max-width: 100%; }
 }
+.form-error {
+  background: var(--error-light);
+  color: var(--error);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(220,38,38,0.2);
+}
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper .form-input {
+  width: 100%;
+  padding-right: 40px;
+}
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle:hover {
+  color: var(--text);
+}

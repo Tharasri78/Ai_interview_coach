@@ -1,18 +1,31 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.db.models import User
+import bcrypt
 
 router = APIRouter()
 
+
+# ---------------- SIGNUP ----------------
 @router.post("/signup/")
 def signup(name: str, email: str, password: str, db: Session = Depends(get_db)):
 
+    # check if user exists
     existing = db.query(User).filter(User.email == email).first()
     if existing:
-        return {"error": "User already exists"}
+        raise HTTPException(status_code=400, detail="User already exists")
 
-    user = User(name=name, email=email, password=password)
+    # hash password
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+    # create user
+    user = User(
+        name=name,
+        email=email,
+        password=hashed_password
+    )
+
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -24,16 +37,19 @@ def signup(name: str, email: str, password: str, db: Session = Depends(get_db)):
     }
 
 
+# ---------------- LOGIN ----------------
 @router.post("/login/")
 def login(email: str, password: str, db: Session = Depends(get_db)):
 
-    user = db.query(User).filter(
-        User.email == email,
-        User.password == password
-    ).first()
+    # find user by email
+    user = db.query(User).filter(User.email == email).first()
 
     if not user:
-        return {"error": "Invalid credentials"}
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    # check password
+    if not bcrypt.checkpw(password.encode(), user.password.encode()):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
     return {
         "user_id": user.id,

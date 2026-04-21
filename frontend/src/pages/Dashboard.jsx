@@ -5,6 +5,8 @@ import Question from "../components/Question";
 import Answer from "../components/Answer";
 import { getHistory } from "../api/apiService";
 import { useNavigate } from "react-router-dom";
+import { FaBullseye, FaChartBar, FaSignOutAlt } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -17,7 +19,6 @@ export default function Dashboard() {
 
   const userId = Number(localStorage.getItem("user_id")) || 1;
   const userName = localStorage.getItem("user_name") || "User";
-  const userEmail = localStorage.getItem("user_email") || "";
 
   useEffect(() => {
     if (tab === "history") fetchHistory();
@@ -35,19 +36,16 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user_id");
-    localStorage.removeItem("user_email");
-    localStorage.removeItem("user_name");
+    localStorage.clear();
     navigate("/");
   };
 
-  // ✅ step logic now correct
   const step = !isUploaded ? 1 : !questionData ? 2 : 3;
 
+  // ✅ FIXED icons (NO emojis)
   const navItems = [
-    { icon: "🎯", label: "Practice", key: "practice" },
-    { icon: "📊", label: "History", key: "history" },
-    { icon: "⚙️", label: "Settings", key: "settings" },
+    { icon: <FaBullseye />, label: "Practice", key: "practice" },
+    { icon: <FaChartBar />, label: "History", key: "history" },
   ];
 
   const FeedbackTag = ({ score }) => {
@@ -67,10 +65,13 @@ export default function Dashboard() {
         </div>
 
         <div className="sidebar-section-label">Main</div>
+
         <nav className="sidebar-nav">
           {navItems.map((item) => (
-            <div
+            <motion.div
               key={item.key}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.97 }}
               className={`sidebar-item ${tab === item.key ? "active" : ""}`}
               onClick={() => setTab(item.key)}
             >
@@ -79,23 +80,28 @@ export default function Dashboard() {
               {item.key === "history" && history.length > 0 && (
                 <span className="sidebar-item-badge">{history.length}</span>
               )}
-            </div>
+            </motion.div>
           ))}
         </nav>
 
-        <div className="sidebar-section-label">Resources</div>
-        <nav className="sidebar-nav">
-          <div className="sidebar-item"><span className="sidebar-item-icon">📄</span>My PDFs</div>
-          <div className="sidebar-item"><span className="sidebar-item-icon">❓</span>Help</div>
-        </nav>
-
+        {/* USER */}
         <div className="sidebar-user">
           <div className="user-avatar">{userName[0]?.toUpperCase()}</div>
           <div>
             <div className="user-name">{userName}</div>
-            <div className="user-role"><span className="user-role-dot" /> Free Plan</div>
           </div>
         </div>
+
+        {/* ✅ LOGOUT BUTTON ADDED */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="btn btn-outline btn-full"
+          style={{ marginTop: 12 }}
+          onClick={handleLogout}
+        >
+          <FaSignOutAlt /> Logout
+        </motion.button>
       </aside>
 
       {/* MAIN */}
@@ -121,7 +127,6 @@ export default function Dashboard() {
                 <p className="page-subtitle">Complete each step in order to begin.</p>
               </div>
 
-              {/* STEP FLOW */}
               <div className="flow-steps">
                 {[{ n: 1, label: "Upload PDF" }, { n: 2, label: "Generate Question" }, { n: 3, label: "Submit Answer" }].map((s, i) => (
                   <div key={s.n} style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -135,14 +140,13 @@ export default function Dashboard() {
               </div>
 
               <div className="dashboard-grid">
-
                 <Upload
-  userId={userId}
-  onUploaded={(status) => {
-    setIsUploaded(status);
-    if (!status) setQuestionData(null);
-  }}
-/>
+                  userId={userId}
+                  onUploaded={(status) => {
+                    setIsUploaded(status);
+                    if (!status) setQuestionData(null);
+                  }}
+                />
 
                 <Question
                   userId={userId}
@@ -173,7 +177,7 @@ export default function Dashboard() {
               <div className="card">
                 <div className="card-header">
                   <div className="card-title-group">
-                    <div className="card-icon blue">📊</div>
+                    <div className="card-icon blue"><FaChartBar /></div>
                     <div>
                       <div className="card-title">Past Attempts</div>
                       <div className="card-sub">{history.length} sessions recorded</div>
@@ -192,7 +196,7 @@ export default function Dashboard() {
                   {history.map((h, i) => (
                     <div className="history-item" key={i} onClick={() => setOpenIndex(i === openIndex ? null : i)}>
                       <div className={`history-score ${h.overall >= 8 ? "score-hi" : h.overall >= 5 ? "score-mid" : "score-lo"}`}>
-                        {h.overall ? h.overall.toFixed(1) : "—"}
+                      {typeof h.overall === "number" ? h.overall.toFixed(1) : "—"}
                       </div>
                       <div className="history-content">
                         <div className="history-question">
@@ -220,61 +224,24 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* SETTINGS unchanged */}
-          {tab === "settings" && (
-            <>
-              <div className="page-header">
-                <h1 className="page-title">Settings</h1>
-                <p className="page-subtitle">Manage your account and preferences.</p>
-              </div>
-
-              <div className="card settings-card">
-                <div className="card-header">
-                  <div className="card-title-group">
-                    <div className="card-icon blue">⚙️</div>
-                    <div><div className="card-title">Account</div></div>
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  <div>
-                    <div className="field-label">Display Name</div>
-                    <input className="text-input" defaultValue={userName} />
-                  </div>
-                  <div>
-                    <div className="field-label">Email</div>
-                    <input className="text-input" defaultValue={userEmail} />
-                  </div>
-                  <div>
-                    <div className="field-label">User ID</div>
-                    <input className="text-input" value={userId} readOnly style={{ opacity: 0.5, cursor: "not-allowed" }} />
-                  </div>
-
-                  <hr className="settings-divider" />
-
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <button className="btn btn-blue btn-sm">Save Changes</button>
-                    <button className="btn btn-outline btn-sm" onClick={handleLogout}>Log Out</button>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
         </main>
 
         {/* MOBILE NAV */}
         <div className="mobile-bottom-nav">
           <div className="mobile-bottom-nav-inner">
             {navItems.map((item) => (
-              <div key={item.key}
+              <div
+                key={item.key}
                 className={`mobile-nav-item ${tab === item.key ? "active" : ""}`}
-                onClick={() => setTab(item.key)}>
+                onClick={() => setTab(item.key)}
+              >
                 <span className="mobile-nav-item-icon">{item.icon}</span>
                 {item.label}
               </div>
             ))}
           </div>
         </div>
+
       </div>
     </div>
   );
