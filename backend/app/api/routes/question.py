@@ -19,8 +19,14 @@ async def generate_question_api(user_id: int, topic: str, db: Session = Depends(
 
     if vs:
         docs = retrieve_docs(vs, topic, k=2)
+        
+        
 
-    difficulty = get_next_difficulty(get_user_avg_score(db, user_id))
+    avg_score = get_user_avg_score(db, user_id)
+    print("AVG SCORE:", avg_score)
+
+    difficulty = get_next_difficulty(avg_score)
+    print("DIFFICULTY:", difficulty)
 
     question = generate_question(topic, docs, difficulty)
 

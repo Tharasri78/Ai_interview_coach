@@ -24,9 +24,10 @@ export const uploadPDF = (userId, formData) => {
 
 /* Generate Question */
 export const generateQuestion = (userId, topic) => {
-  return API.get(`/generate-question/?user_id=${userId}&topic=${encodeURIComponent(topic)}`);
+  return API.get(
+    `/generate-question/?user_id=${userId}&topic=${encodeURIComponent(topic)}`
+  );
 };
-
 /* Submit Answer */
 export const submitAnswer = (userId, question, answer) => {
   return API.post("/submit-answer/", {
@@ -39,4 +40,9 @@ export const submitAnswer = (userId, question, answer) => {
 /* Get History */
 export const getHistory = (userId) => {
   return API.get(`/history/${userId}`);
+};
+/* Get Summary */
+
+export const getSummary = (userId) => {
+  return API.get(`/summary/${userId}`);
 };

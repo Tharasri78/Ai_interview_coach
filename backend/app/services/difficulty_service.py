@@ -1,23 +1,28 @@
 def get_next_difficulty(avg_score):
-
     if avg_score is None:
         return "easy"
 
-    if avg_score < 4:
-        return "easy"
-    elif avg_score < 7:
+    if avg_score >= 8:
+        return "hard"
+    elif avg_score >= 5:
         return "medium"
     else:
-        return "hard"
+        return "easy"
 
 
 def get_user_avg_score(db, user_id):
     try:
-        results = db.execute(
+        result = db.execute(
             "SELECT AVG(overall) FROM answers WHERE user_id = :uid",
             {"uid": user_id}
         ).fetchone()
 
-        return results[0] if results and results[0] else None
-    except:
-        return None
+        # 🔥 CRITICAL FIX
+        if result is None or result[0] is None:
+            return 0   # no data → treat as beginner
+
+        return float(result[0])  # ensure numeric
+
+    except Exception as e:
+        print("AVG SCORE ERROR:", e)
+        return 0

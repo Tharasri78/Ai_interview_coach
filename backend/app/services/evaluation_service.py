@@ -5,7 +5,7 @@ import re
 def evaluate_answer(question, answer):
 
     prompt = f"""
-You are a strict technical interviewer.
+You are a STRICT technical interviewer.
 
 Evaluate the candidate's answer.
 
@@ -17,8 +17,7 @@ Answer:
 
 Return ONLY raw JSON.
 Do NOT use markdown.
-Do NOT include ``` or any explanation.
-Start with {{ and end with }}.
+Do NOT include ``` or explanations.
 
 Format:
 {{
@@ -31,59 +30,80 @@ Format:
   "feedback": {{
     "issues": "...",
     "missing": "...",
-    "ideal": "..."
+    "ideal": "...",
+    "improved_answer": "..."
   }}
 }}
 
-Scoring rules:
-- technical: correctness (0-10)
-- depth: explanation depth (0-10)
-- clarity: communication (0-10)
-- overall: average (rounded)
-
-Be strict:
-- vague answers → low score
-- incomplete answers → penalize
-- no explanation → very low score
+Rules:
+- Be brutally honest
+- No generic feedback
+- "missing" must be bullet-style (comma separated)
+- "improved_answer" must be a strong 3–5 line interview answer
+- Return ONLY JSON
 """
 
     result = generate_text(
         prompt,
         temperature=0.3,
-        max_tokens=250,
+        max_tokens=300,
         task="evaluation"
     )
 
     # ❌ LLM failed
     if not result:
-        return {
-            "error": "LLM failed",
-            "scores": None,
-            "feedback": None
-        }
+        return default_response("LLM failed")
 
     try:
-        # 🔥 CRITICAL FIX: extract ONLY JSON
+        # 🔥 Extract JSON safely
         match = re.search(r"\{.*\}", result, re.DOTALL)
-
         if not match:
             raise ValueError("No JSON found")
 
-        clean_json = match.group()
+        clean = match.group()
 
-        parsed = json.loads(clean_json)
+        # 🔥 Remove trailing commas (common LLM bug)
+        clean = re.sub(r",\s*}", "}", clean)
+        clean = re.sub(r",\s*]", "]", clean)
 
-        # 🔥 EXTRA SAFETY (avoid frontend crash)
-        if "scores" not in parsed or "feedback" not in parsed:
-            raise ValueError("Invalid structure")
+        parsed = json.loads(clean)
 
-        return parsed
-
-    except Exception as e:
-        print("JSON PARSE ERROR:", result)
+        scores = parsed.get("scores", {})
+        feedback = parsed.get("feedback", {})
 
         return {
-            "error": "Invalid LLM response",
-            "scores": None,
-            "feedback": None
+            "scores": {
+                "technical": scores.get("technical", 0),
+                "depth": scores.get("depth", 0),
+                "clarity": scores.get("clarity", 0),
+                "overall": scores.get("overall", 0),
+            },
+            "feedback": {
+                "issues": feedback.get("issues", ""),
+                "missing": feedback.get("missing", ""),
+                "ideal": feedback.get("ideal", ""),
+                "improved_answer": feedback.get("improved_answer", "")
+            }
         }
+
+    except Exception:
+        print("JSON PARSE ERROR:", result)
+        return default_response("Invalid LLM response")
+
+
+def default_response(error_msg):
+    return {
+        "error": error_msg,
+        "scores": {
+            "technical": 0,
+            "depth": 0,
+            "clarity": 0,
+            "overall": 0
+        },
+        "feedback": {
+            "issues": "Evaluation failed",
+            "missing": "",
+            "ideal": "",
+            "improved_answer": ""
+        }
+    }

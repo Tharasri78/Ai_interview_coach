@@ -92,16 +92,15 @@ export default function Auth() {
             Interview with confidence.
           </h2>
 
-          <p>
-            Practice interview questions based on your skills and chosen topics.
-            Get AI-powered feedback on every answer and improve over time.
-          </p>
+          
 
           <div className="auth-left-features">
             {[
               { icon: "✦", text: "Upload your resume or learning material to get started" },
               { icon: "✦", text: "Practice questions based on selected topics" },
               { icon: "✦", text: "Get detailed AI feedback on your answers" },
+                  { icon: "✦", text: "Track your progress with performance summary" },
+
             ].map((f, i) => (
               <div className="auth-feature" key={i}>
                 <div className="auth-feature-icon">{f.icon}</div>

@@ -510,3 +510,214 @@ body {
   font-size: 13px;
   color: #7a271a;
 }
+.feedback-block.improved {
+  background: #F0FDF4;
+  border-left: 4px solid #22C55E;
+}
+.difficulty-chip {
+  margin-top: 10px;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* color coding */
+.difficulty-chip.easy {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.difficulty-chip.medium {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.difficulty-chip.hard {
+  background: #FEF2F2;
+  color: #DC2626;
+}
+.feedback-block.followup {
+  background: #FFF7ED;
+  border-left: 4px solid #F97316;
+}
+.msg-warning {
+  background: #FFF7ED;
+  color: #C2410C;
+  border: 1px solid #FDBA74;
+}
+/* Add to Dashboard.css - ensure mobile bottom nav is always visible on small screens */
+
+/* Mobile bottom navigation - make sure it's visible */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 10px 0 16px;
+  z-index: 100;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-bottom-nav-inner {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 6px 20px;
+  border-radius: 8px;
+  transition: all 0.15s;
+  color: var(--subtle);
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.mobile-nav-item.active {
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.mobile-nav-item-icon {
+  font-size: 1.2rem;
+}
+
+/* Show mobile bottom nav only on tablet/mobile */
+@media (max-width: 1024px) {
+  .mobile-bottom-nav {
+    display: block;
+  }
+  
+  .dashboard-main {
+    padding-bottom: 80px;
+  }
+}
+
+/* Mobile sidebar toggle */
+@media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebar.mobile-open {
+    left: 0;
+  }
+  
+  .mobile-menu-btn {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 4px 8px;
+  }
+  
+  .mobile-menu-btn:hover {
+    color: var(--accent);
+  }
+}
+
+/* Upload dropzone disabled state */
+.upload-dropzone.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.upload-dropzone.disabled:hover {
+  border-color: var(--border2);
+  background: transparent;
+}/* Dark black headings and bold content */
+.result-section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.result-text {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #1a1a1a;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* For bullet points and lists */
+.result-text ul, 
+.missing-list {
+  margin: 6px 0 0 20px;
+  padding: 0;
+}
+
+.result-text li,
+.missing-list li {
+  color: #1a1a1a;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+/* Score info text */
+.score-info h4 {
+  font-weight: 700;
+  color: #000000;
+}
+
+.score-info p {
+  color: #4a4a4a;
+  font-weight: 500;
+}
+
+/* Question display */
+.question-text {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #000000;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+/* Card titles */
+.card-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 2px;
+  font-family: 'Sora', sans-serif;
+}
+
+/* Field labels */
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 7px;
+  letter-spacing: 0.01em;
+}
+/* Sidebar MAIN heading - extra large and bold */
+.sidebar-section-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #000000;
+  font-weight: 900;
+  padding: 0 10px;
+  margin-bottom: 12px;
+  margin-top: 24px;
+  font-family: 'Sora', sans-serif;
+}
