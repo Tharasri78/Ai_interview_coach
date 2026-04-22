@@ -191,7 +191,7 @@ Get instant AI feedback on every answer.
         <div className="footer-logo">
           <span className="footer-logo-dot" /> Prepply
         </div>
-        <span>© 2025 Prepply. All rights reserved.</span>
+        <span>© 2026 Prepply. All rights reserved.</span>
       </footer>
     </div>
   );

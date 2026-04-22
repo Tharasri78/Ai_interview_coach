@@ -23,6 +23,12 @@ export default function Dashboard() {
   useEffect(() => {
     if (tab === "history") fetchHistory();
   }, [tab]);
+  useEffect(() => {
+  if (tab === "practice") {
+    setIsUploaded(false);
+    setQuestionData(null);
+  }
+}, [tab]);
 
   const fetchHistory = async () => {
     setHistoryLoading(true);
