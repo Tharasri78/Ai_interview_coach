@@ -1,139 +1,128 @@
 
-# Prepply - AI Interview Coach
+# AI Interview Coach
 
-A full-stack AI-powered application designed to help users practice and improve their interview skills through personalized question generation and structured feedback.
-
-The platform allows users to upload learning materials, generate topic-based questions, submit answers, and track performance through a centralized dashboard.
-
-The project demonstrates LLM integration, Retrieval-Augmented Generation (RAG), adaptive difficulty logic, and full-stack development using modern technologies.
+An AI-powered system that helps users practice interview questions using their own study materials.  
+The platform generates questions from uploaded PDFs and evaluates answers using a Retrieval-Augmented Generation (RAG) pipeline.
 
 ---
 
-# Link
+# Project Structure
 
-Demo  
-https://drive.google.com/file/d/12XhSMpNTYCVKpwQl8B-MMoROSPAUOGma/view?usp=drive_link  
+backend/ — FastAPI server, RAG pipeline, evaluation logic  
+frontend/ — React application (user interface)  
+vector_store/ — FAISS index (embeddings storage)  
+uploads/ — uploaded PDFs  
 
 ---
 
 # Key Features
 
-• PDF-based question generation using user content  
-• Topic-based question input system  
-• AI-powered answer evaluation  
-
-• Scoring based on:
-* Technical accuracy  
-* Depth  
-* Clarity  
-
-• Adaptive difficulty system  
-* Easy  
-* Medium  
-* Hard  
-
-• Performance tracking system  
-• History of past attempts  
-• Summary dashboard  
-
-• Strong and weak area identification  
-• Topic-wise performance insights  
-• Fallback question handling (when no PDF context is found)  
+• Upload PDF documents (resume, notes, study material)  
+• Topic-based question generation  
+• AI-based answer evaluation (technical accuracy, depth, clarity)  
+• RAG pipeline for context-aware questions  
+• Fallback question generation when no document context is found  
+• History tracking of past attempts  
+• Performance summary and scoring  
 
 ---
 
 # Tech Stack
 
-## Frontend
-
-* React.js  
-* Vite  
-* Axios  
-* Framer Motion  
-* CSS  
-
 ## Backend
+- FastAPI  
+- Python  
+- FAISS (vector database)  
+- LangChain (RAG pipeline)  
 
-* FastAPI  
-* SQLAlchemy  
-* REST APIs  
+## Frontend
+- React  
+- Axios  
+- CSS  
 
-## Database
-
-* SQLite  
-
-## AI & ML
-
-* LangChain (RAG)  
-* FAISS (Vector Store)  
-* HuggingFace Embeddings  
-* LLM API  
-
+## AI / GenAI
+- LLM integration for question generation  
+- RAG (Retrieval-Augmented Generation)  
+- Embeddings for document retrieval  
 
 ---
 
-# System Architecture
+# Requirements
 
-```
-
-React Client
-│
-▼
-FastAPI Backend
-│
-▼
-Vector Store (FAISS) + Database
-│
-▼
-LLM (Question Generation + Evaluation)
-
-```
-
-1. The frontend handles user interaction and UI.  
-2. The backend processes requests and manages logic.  
-3. Vector store retrieves relevant document context.  
-4. LLM generates questions and evaluates answers.  
+- Python 3.9+  
+- Node.js 16+  
+- npm  
+- API key for LLM (OpenAI / compatible provider)  
 
 ---
 
-# Installation & Setup
+# Backend — Setup & Run
 
-## 1. Clone Repository
-
-```
-
-git clone https://github.com/Tharasri78/Ai_interview_coach
-cd Ai_interview_coach
-
-```
-
----
-
-## 2. Run Backend
+Go to backend:
 
 ```
 
 cd backend
+
+```
+
+Install dependencies:
+
+```
+
 pip install -r requirements.txt
-uvicorn app.main:app --reload
 
 ```
 
-Backend runs on:
+Create `.env` file:
 
 ```
-http://localhost:8000
+
+OPENAI_API_KEY=your_api_key
+DATABASE_URL=sqlite:///./app.db
+
+```
+
+Run server:
+
+```
+
+uvicorn main:app --reload
+
+```
+
+Server runs on:
+
+```
+
+[http://localhost:8000](http://localhost:8000)
 
 ```
 
 ---
 
-## 3. Run Frontend
+# Frontend — Setup & Run
+
+Go to frontend:
 
 ```
 
 cd frontend
+
+```
+
+Install dependencies:
+
+```
+
 npm install
+
+```
+
+Start app:
+
+```
+
 npm run dev
 
 ```
@@ -141,19 +130,115 @@ npm run dev
 Frontend runs on:
 
 ```
-http://localhost:5173
+
+[http://localhost:5173](http://localhost:5173)
 
 ```
 
 ---
 
+# System Flow
 
+```
+
+User → Upload PDF
+↓
+Frontend → FastAPI Backend
+↓
+Text Extraction → Embeddings → FAISS
+↓
+RAG Retrieval → LLM
+↓
+Question Generation / Answer Evaluation
+
+```
+
+---
+
+# API Overview
+
+## Question
+
+```
+
+POST /generate-question
+
+```
+
+Generate a question based on topic and document context  
+
+## Answer
+
+```
+
+POST /submit-answer
+
+```
+
+Evaluate answer and return score + feedback  
+
+## History
+
+```
+
+GET /history/{user_id}
+
+```
+
+Retrieve past attempts  
+
+## Summary
+
+```
+
+GET /summary/{user_id}
+
+```
+
+Performance insights  
+
+---
+
+# Environment Variables
+
+## Backend
+
+```
+
+OPENAI_API_KEY=your_api_key
+DATABASE_URL=your_database_url
+
+```
+
+## Frontend
+
+```
+
+VITE_API_BASE_URL=[http://localhost:8000](http://localhost:8000)
+
+```
+
+---
+
+# Deployment Notes
+
+- Ensure backend is deployed with HTTPS  
+- Update frontend API base URL accordingly  
+- Use persistent storage for FAISS index in production  
+
+---
 
 # Author
 
 Thara Sri  
+
+GitHub  
 https://github.com/Tharasri78  
 
 ---
 
+# License
+
+This project is developed for learning and portfolio purposes.
+```
 
