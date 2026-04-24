@@ -1,8 +1,4 @@
 
-
----
-
-```md
 # Prepply - AI Interview Coach
 
 A full-stack AI-powered application designed to help users practice and improve their interview skills through personalized question generation and structured feedback.
