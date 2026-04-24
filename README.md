@@ -12,7 +12,7 @@ The project demonstrates LLM integration, Retrieval-Augmented Generation (RAG), 
 # Link
 
 Demo  
-https://your-demo-link.com  
+https://drive.google.com/file/d/12XhSMpNTYCVKpwQl8B-MMoROSPAUOGma/view?usp=drive_link  
 
 ---
 
@@ -102,7 +102,7 @@ LLM (Question Generation + Evaluation)
 
 ```
 
-git clone [https://github.com/Tharasri78/Ai_interview_coach](https://github.com/Tharasri78/Ai_interview_coach)
+git clone https://github.com/Tharasri78/Ai_interview_coach
 cd Ai_interview_coach
 
 ```
@@ -122,8 +122,7 @@ uvicorn app.main:app --reload
 Backend runs on:
 
 ```
-
-[http://localhost:8000](http://localhost:8000)
+http://localhost:8000
 
 ```
 
@@ -142,8 +141,7 @@ npm run dev
 Frontend runs on:
 
 ```
-
-[http://localhost:5173](http://localhost:5173)
+http://localhost:5173
 
 ```
 
