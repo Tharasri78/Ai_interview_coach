@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-
 import "./Dashboard.css";
 import Upload from "../components/Upload";
 import Question from "../components/Question";
 import Answer from "../components/Answer";
-import { getHistory } from "../api/apiService";
+import { getHistory, generateQuestion } from "../api/apiService";
 import { useNavigate } from "react-router-dom";
 import { FaBullseye, FaChartBar, FaSignOutAlt, FaChartLine } from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -15,6 +14,10 @@ export default function Dashboard() {
   const [tab, setTab] = useState("practice");
   const [isUploaded, setIsUploaded] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(null);
+
+  // ✅ FIX: only ONE topic state
+  const [topic, setTopic] = useState("");
+
   const [answerSubmitted, setAnswerSubmitted] = useState(false);
   const [currentResult, setCurrentResult] = useState(null);
 
@@ -49,7 +52,15 @@ export default function Dashboard() {
     navigate("/");
   };
 
+  // ✅ SINGLE SOURCE OF TRUTH
   const handleQuestionGenerated = (question) => {
+    if (!question) return;
+
+    if (question.error) {
+      console.error("Question error:", question.error);
+      return;
+    }
+
     setCurrentQuestion(question);
     setAnswerSubmitted(false);
     setCurrentResult(null);
@@ -66,10 +77,22 @@ export default function Dashboard() {
     setCurrentResult(null);
   };
 
-  const handleNewQuestion = () => {
-    setCurrentQuestion(null);
-    setAnswerSubmitted(false);
-    setCurrentResult(null);
+  // ✅ FIXED NEXT QUESTION
+  const handleNewQuestion = async () => {
+    if (!topic || topic.trim().length < 2) {
+      alert("Enter topic first");
+      return;
+    }
+
+    try {
+      const res = await generateQuestion(userId, topic);
+
+      // ✅ ALWAYS USE SAME HANDLER
+      handleQuestionGenerated(res.data);
+
+    } catch (err) {
+      console.error("Next question failed:", err);
+    }
   };
 
   const showUploadGuidance = !isUploaded;
@@ -162,14 +185,12 @@ export default function Dashboard() {
               const sidebar = document.querySelector('.sidebar');
               sidebar?.classList.toggle('mobile-open');
             }}
-          >
-          
-          </button>
+          />
         </div>
 
         <main className="dashboard-main">
 
-          {/* PRACTICE TAB */}
+          {/* PRACTICE */}
           {tab === "practice" && (
             <>
               <div className="page-header">
@@ -182,8 +203,7 @@ export default function Dashboard() {
               </div>
 
               <div className="flow-steps">
-                {[
-                  { n: 1, label: "Upload PDF", active: showUploadGuidance, done: isUploaded },
+                {[{ n: 1, label: "Upload PDF", active: showUploadGuidance, done: isUploaded },
                   { n: 2, label: "Generate Question", active: showQuestionGuidance, done: currentQuestion !== null },
                   { n: 3, label: "Submit Answer", active: showAnswerGuidance, done: answerSubmitted }
                 ].map((s, i) => (
@@ -198,17 +218,15 @@ export default function Dashboard() {
               </div>
 
               <div className="dashboard-grid">
-                <Upload
-                  userId={userId}
-                  onUploaded={setIsUploaded}
-                  isUploaded={isUploaded}
-                />
+                <Upload userId={userId} onUploaded={setIsUploaded} isUploaded={isUploaded} />
 
                 <Question
                   userId={userId}
                   isUploaded={isUploaded}
                   onQuestionGenerated={handleQuestionGenerated}
                   currentQuestion={currentQuestion}
+                  topic={topic}
+                  setTopic={setTopic}
                 />
               </div>
 
@@ -226,7 +244,7 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* HISTORY TAB */}
+          {/* HISTORY */}
           {tab === "history" && (
             <>
               <div className="page-header">
@@ -249,7 +267,7 @@ export default function Dashboard() {
                 {historyLoading && <div className="loading-bar"><div className="loading-bar-fill" /></div>}
 
                 {!historyLoading && history.length === 0 && (
-                  <div className="msg msg-info">No history yet. Complete a practice session first.</div>
+                  <div className="msg msg-info">No history yet.</div>
                 )}
 
                 <div className="history-list">
@@ -260,7 +278,7 @@ export default function Dashboard() {
                       </div>
                       <div className="history-content">
                         <div className="history-question">
-                          {h.question?.length > 80 ? h.question.slice(0, 80) + "..." : h.question}
+                          {h.question?.slice(0, 80)}
                           <FeedbackTag score={h.overall} />
                         </div>
                         {openIndex === i && (
@@ -284,20 +302,14 @@ export default function Dashboard() {
         </main>
       </div>
 
-      {/* MOBILE BOTTOM NAVIGATION */}
+      {/* MOBILE NAV */}
       <div className="mobile-bottom-nav">
         <div className="mobile-bottom-nav-inner">
           {navItems.map((item) => (
             <div
               key={item.key}
               className={`mobile-nav-item ${tab === item.key ? "active" : ""}`}
-              onClick={() => {
-                if (item.key === "summary") {
-                  navigate("/summary");
-                } else {
-                  setTab(item.key);
-                }
-              }}
+              onClick={() => item.key === "summary" ? navigate("/summary") : setTab(item.key)}
             >
               <span className="mobile-nav-item-icon">{item.icon}</span>
               <span>{item.label}</span>

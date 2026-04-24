@@ -2,51 +2,52 @@ import { useState } from "react";
 import { generateQuestion } from "../api/apiService";
 import { FiRefreshCw, FiAlertCircle } from "react-icons/fi";
 
-export default function Question({ userId, isUploaded, onQuestionGenerated, currentQuestion }) {
-  const [topic, setTopic] = useState("");
+export default function Question({ userId, isUploaded, onQuestionGenerated, currentQuestion, topic, setTopic }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
 
   const generate = async () => {
-    if (!userId) {
-      setError("User not logged in. Please login again.");
-      return;
-    }
-    if (!topic.trim()) {
-      setError("Please enter a topic");
-      return;
-    }
-    if (!isUploaded) {
-      setError("Please upload a PDF first");
-      return;
-    }
+  if (!userId) {
+    setError("User not logged in. Please login again.");
+    return;
+  }
+  if (!topic.trim()) {
+    setError("Please enter a topic");
+    return;
+  }
+  if (!isUploaded) {
+    setError("Please upload a PDF first");
+    return;
+  }
 
-    setLoading(true);
-    setError("");
-    setStatusMsg("Generating question...");
+  setLoading(true);
+  setError("");
+  setStatusMsg("Generating question...");
 
-    try {
-      const res = await generateQuestion(userId, topic);
-      const response = res.data;
+  try {
+    const res = await generateQuestion(userId, topic);
+    const response = res.data;
 
-      onQuestionGenerated(response);
+    onQuestionGenerated(response);
 
-      if (response.fallback) {
-        setError("Showing a general question (not from your PDF)");
-      } else {
-        setError("");
-        setStatusMsg("Question generated! Write your answer below.");
-      }
+    // ✅ CLEAR LOADING MESSAGE IMMEDIATELY
+    setStatusMsg("");
 
-    } catch (err) {
-      console.error("Generation error:", err);
-      setError("Failed to generate. Please check your connection and try again.");
+    if (response.fallback) {
+      setError("Showing a general question (not from your PDF)");
+    } else {
+      setError("");
     }
 
-    setLoading(false);
-    setTimeout(() => setStatusMsg(""), 3000);
-  };
+  } catch (err) {
+    console.error("Generation error:", err);
+    setStatusMsg(""); // ✅ clear here also
+    setError("Failed to generate. Please check your connection and try again.");
+  }
+
+  setLoading(false);
+};
 
   return (
     <div className="card">
@@ -98,6 +99,11 @@ export default function Question({ userId, isUploaded, onQuestionGenerated, curr
 
       {currentQuestion && (
         <div className="question-box">
+          {currentQuestion.fallback && (
+  <div className="msg msg-warning">
+    ⚠ Using general knowledge (not from your PDF)
+  </div>
+)}
           <div className="question-text">{currentQuestion.question}</div>
           {currentQuestion.difficulty && (
             <div className={`difficulty-chip ${currentQuestion.difficulty}`}>

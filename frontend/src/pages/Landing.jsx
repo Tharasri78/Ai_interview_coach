@@ -1,6 +1,20 @@
 import "./Landing.css";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import { 
+  FiTrendingUp, 
+  FiTarget, 
+  FiBarChart2, 
+  FiSun,
+  FiCpu,
+  FiZap,
+  FiActivity,
+  FiArrowRight,
+  FiBookOpen,
+  FiMessageSquare,
+  FiAward,
+  FiCheckCircle
+} from "react-icons/fi";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -24,32 +38,32 @@ export default function Landing() {
 
   const features = [
     {
-      n: "01",
+      icon: <FiBookOpen size={22} />,
       title: "Skill-based questions",
-      desc: "Questions are generated based on your selected topic and extracted skills."
+      desc: "Questions generated based on your selected topic and extracted skills."
     },
     {
-      n: "02",
+      icon: <FiMessageSquare size={22} />,
       title: "AI answer evaluation",
       desc: "Your answers are scored on technical accuracy, depth, and clarity."
     },
     {
-      n: "03",
+      icon: <FiTarget size={22} />,
       title: "Gap identification",
       desc: "Understand exactly where your answer lacks depth or clarity."
     },
     {
-      n: "04",
+      icon: <FiAward size={22} />,
       title: "Topic-focused practice",
       desc: "Practice specific topics instead of random interview questions."
     },
     {
-      n: "05",
+      icon: <FiTrendingUp size={22} />,
       title: "Adaptive difficulty",
       desc: "Difficulty adjusts based on your performance during the session."
     },
     {
-      n: "06",
+      icon: <FiBarChart2 size={22} />,
       title: "Performance tracking",
       desc: "Track your scores and improvement across sessions."
     },
@@ -57,195 +71,224 @@ export default function Landing() {
 
   const steps = [
     {
-      n: "1",
+      num: "01",
       title: "Upload your resources",
-      desc: "Extract skills automatically to personalize your practice."
+      desc: "Upload PDFs of your learning material. Prepply extracts key concepts automatically."
     },
     {
-      n: "2",
+      num: "02",
       title: "Choose a topic",
-      desc: "Select the area you want to practice."
+      desc: "Select any topic from your materials or enter a new one to practice."
     },
     {
-      n: "3",
+      num: "03",
       title: "Answer questions",
-      desc: "Respond with your own explanation — no MCQs."
+      desc: "Write your own answers — no multiple choice, just real interview practice."
     },
     {
-      n: "4",
+      num: "04",
       title: "Get AI feedback",
-      desc: "Receive scores and insights to improve your answers."
+      desc: "Receive detailed scores and actionable insights to improve your answers."
     },
   ];
 
   return (
-    <div>
-      {/* NAV */}
+    <div className="landing">
+      {/* NAVBAR */}
       <nav className="nav">
-        <div className="nav-logo">
-          <span className="nav-logo-mark">P</span>
-          Prepply
-        </div>
-        <ul className="nav-links">
-          <li><a href="#features">Features</a></li>
-          <li><a href="#process">How it works</a></li>
-        </ul>
-        <div className="nav-cta">
-          <button className="btn-ghost" onClick={() => navigate("/auth")}>Sign in</button>
-          <button className="btn-nav-primary" onClick={() => navigate("/auth")}>Get started</button>
+        <div className="nav-container">
+          <div className="nav-logo" onClick={() => navigate("/")}>
+            <span className="logo-text">Prepply</span>
+          </div>
+          
+          <div className="nav-links">
+            <a href="#features" className="nav-link">Features</a>
+            <a href="#process" className="nav-link">How it works</a>
+          </div>
+          
+          <div className="nav-buttons">
+            <button className="btn-outline" onClick={() => navigate("/auth")}>Sign in</button>
+            <button className="btn-primary" onClick={() => navigate("/auth")}>Get started</button>
+          </div>
         </div>
       </nav>
 
-      {/* HERO */}
+      {/* HERO SECTION */}
       <section className="hero">
-        <div className="hero-bg-grid" />
-        <div className="hero-blob hero-blob-1" />
-        <div className="hero-blob hero-blob-2" />
-        <div className="hero-blob hero-blob-3" />
-
-        <div className="hero-eyebrow">
-          <span className="eyebrow-dot" /> AI Interview Coach
+        <div className="hero-bg">
+          <div className="hero-blob-1"></div>
+          <div className="hero-blob-2"></div>
+          <div className="hero-blob-3"></div>
         </div>
-
-        <h1>
-          <span className="word">Prepare</span>{' '}
-          <span className="word">smarter.</span><br />
-          <span className="word">Interview</span>{' '}
-          <span className="word">with</span>{' '}
-          <span className="word accent-word">confidence.</span>
-        </h1>
-
-        <p className="hero-sub">
-          Practice interview questions based on your skills and chosen topics.
-          Get AI-powered feedback on every answer and improve over time.
-        </p>
-
-        <div className="hero-actions">
-          <button className="btn-cta-primary" onClick={() => navigate("/auth")}>
-            Start for free <span className="btn-arrow">→</span>
-          </button>
-          <button className="btn-cta-secondary" onClick={() => document.getElementById("process")?.scrollIntoView({ behavior: "smooth" })}>
-            See how it works
-          </button>
-        </div>
-
-        <div className="hero-proof">
-          <div className="proof-stat">
-            <div className="proof-num">AI-powered</div>
-            <div className="proof-label">Smart evaluation</div>
+        
+        <div className="hero-content">
+          <div className="hero-badge">
+            <span className="badge-dot"></span>
+            AI-Powered Interview Coach
           </div>
-          <div className="proof-divider" />
-          <div className="proof-stat">
-            <div className="proof-num">Real-time</div>
-            <div className="proof-label">Instant feedback</div>
+          
+          <h1 className="hero-title">
+            Prepare smarter.<br />
+            <span className="gradient-text">Master</span> your interview.
+          </h1>
+          
+          <p className="hero-description">
+            Practice with targeted interview questions based on your skills and topics.
+            Get instant AI feedback on every answer and track your progress over time.
+          </p>
+          
+          <div className="hero-buttons">
+            <button className="btn-hero-primary" onClick={() => navigate("/auth")}>
+              Start practicing <FiArrowRight />
+            </button>
+            <button className="btn-hero-secondary" onClick={() => document.getElementById("process")?.scrollIntoView({ behavior: "smooth" })}>
+              How it works
+            </button>
           </div>
-          <div className="proof-divider" />
-          <div className="proof-stat">
-            <div className="proof-num">Track progress</div>
-            <div className="proof-label">Performance summary</div>
+          
+          <div className="hero-stats">
+            <div className="stat-item">
+              <FiCpu className="stat-icon" />
+              <div>
+                <div className="stat-value">AI-powered</div>
+                <div className="stat-label">Smart evaluation</div>
+              </div>
+            </div>
+            <div className="stat-divider"></div>
+            <div className="stat-item">
+              <FiZap className="stat-icon" />
+              <div>
+                <div className="stat-value">Real-time</div>
+                <div className="stat-label">Instant feedback</div>
+              </div>
+            </div>
+            <div className="stat-divider"></div>
+            <div className="stat-item">
+              <FiActivity className="stat-icon" />
+              <div>
+                <div className="stat-value">Track progress</div>
+                <div className="stat-label">Performance summary</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <hr className="section-divider" />
-
-      {/* FEATURES */}
-      <div className="features-section" id="features">
-        <div className="section-wrapper">
-          <div className="fade-up">
-            <div className="section-label">Why Prepply</div>
-            <h2 className="section-heading">Built differently<br />from the ground up</h2>
-            <p className="section-body">Most tools guess what you need to know. Prepply knows — because it reads exactly what you give it.</p>
+      {/* FEATURES SECTION */}
+      <section id="features" className="features">
+        <div className="container">
+          <div className="section-header fade-up">
+            <div className="section-label">Why choose Prepply</div>
+            <h2 className="section-title">Built differently<br />from the ground up</h2>
+            <p className="section-subtitle">
+              Most tools guess what you need to know. Prepply knows — because it reads exactly what you give it.
+            </p>
           </div>
-
-          <div className="features-grid fade-up">
-            {features.map((f) => (
-              <div className="feature-cell" key={f.n}>
-                <div className="feature-num">{f.n}</div>
-                <h3>{f.title}</h3>
-                <p>{f.desc}</p>
+          
+          <div className="features-grid">
+            {features.map((feature, index) => (
+              <div className="feature-card fade-up" key={index} style={{ animationDelay: `${index * 0.05}s` }}>
+                <div className="feature-icon">{feature.icon}</div>
+                <h3 className="feature-title">{feature.title}</h3>
+                <p className="feature-desc">{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* PROCESS */}
-      <div className="process-section" id="process">
-        <div className="fade-up">
-          <div className="section-label">How it works</div>
-          <h2 className="section-heading">Four steps.<br />No guesswork.</h2>
-        </div>
-
-        <div className="process-steps">
-          {steps.map((s, i) => (
-            <div className="process-step fade-up" key={s.n} style={{ transitionDelay: `${i * 0.08}s` }}>
-              <div className="step-index">{s.n}</div>
-              <h4>{s.title}</h4>
-              <p>{s.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* SUMMARY FEATURE SECTION - NEW */}
-      <div className="summary-feature-section">
-        <div className="section-wrapper">
-          <div className="fade-up">
-            <div className="section-label">Track Your Growth</div>
-            <h2 className="section-heading">Performance summary<br />at your fingertips</h2>
-            <p className="section-body">Get detailed insights about your strengths, weaknesses, and progress over time.</p>
+      {/* HOW IT WORKS SECTION */}
+      <section id="process" className="process">
+        <div className="container">
+          <div className="section-header fade-up">
+            <div className="section-label">Simple process</div>
+            <h2 className="section-title">Four steps to success<br />No guesswork</h2>
           </div>
+          
+          <div className="process-steps">
+            {steps.map((step, index) => (
+              <div className="process-step fade-up" key={index} style={{ animationDelay: `${index * 0.1}s` }}>
+                <div className="step-number">{step.num}</div>
+                <h3 className="step-title">{step.title}</h3>
+                <p className="step-desc">{step.desc}</p>
+                {index < steps.length - 1 && <div className="step-connector"></div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <div className="summary-highlights fade-up">
-            <div className="summary-highlight-card">
-              <div className="highlight-icon">📊</div>
+      {/* SUMMARY FEATURE SECTION */}
+      <section className="summary-section">
+        <div className="container">
+          <div className="section-header fade-up">
+            <div className="section-label">Track your growth</div>
+            <h2 className="section-title">Performance summary<br />at your fingertips</h2>
+            <p className="section-subtitle">
+              Get detailed insights about your strengths, weaknesses, and progress over time.
+            </p>
+          </div>
+          
+          <div className="summary-grid">
+            <div className="summary-card fade-up">
+              <div className="summary-icon"><FiBarChart2 size={32} /></div>
               <h3>Skill Breakdown</h3>
               <p>See your scores across technical accuracy, depth, and clarity</p>
             </div>
-            <div className="summary-highlight-card">
-              <div className="highlight-icon">🎯</div>
+            <div className="summary-card fade-up">
+              <div className="summary-icon"><FiTarget size={32} /></div>
               <h3>Strong & Weak Areas</h3>
               <p>Identify what you excel at and what needs improvement</p>
             </div>
-            <div className="summary-highlight-card">
-              <div className="highlight-icon">📈</div>
+            <div className="summary-card fade-up">
+              <div className="summary-icon"><FiTrendingUp size={32} /></div>
               <h3>Topic Performance</h3>
               <p>Track how you perform across different subjects and topics</p>
             </div>
-            <div className="summary-highlight-card">
-              <div className="highlight-icon">💡</div>
+            <div className="summary-card fade-up">
+              <div className="summary-icon"><FiSun size={32} /></div>
               <h3>Personalized Tips</h3>
               <p>Get actionable recommendations to level up your skills</p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* CALLOUT */}
-      <div className="callout-section">
-        <div className="callout-inner fade-up">
-          <p className="callout-quote">"Focused interview practice with real-time AI feedback and <em>performance tracking</em>."</p>
-          <p className="callout-attr">Designed for students, engineers, and anyone who prepares seriously.</p>
+      {/* CALLOUT SECTION */}
+      <section className="callout">
+        <div className="callout-content">
+          <p className="callout-quote">
+            "Focused interview practice with real-time AI feedback and performance tracking."
+          </p>
+          <p className="callout-credit">
+            Designed for students, engineers, and anyone who prepares seriously.
+          </p>
         </div>
-      </div>
+      </section>
 
-      {/* CTA */}
-      <div className="cta-band">
-        <div className="cta-band-inner fade-up">
-          <h2>Ready to prepare properly?</h2>
-          <p>Upload your first document and get your first question in under a minute.</p>
-          <button className="btn-cta-primary" onClick={() => navigate("/auth")}>
-            Get started — it's free <span className="btn-arrow">→</span>
+      {/* CTA SECTION */}
+      <section className="cta">
+        <div className="cta-content">
+          <h2 className="cta-title">Ready to prepare properly?</h2>
+          <p className="cta-description">
+            Upload your first document and get your first question in under a minute.
+          </p>
+          <button className="btn-cta" onClick={() => navigate("/auth")}>
+            Get started — it's free <FiArrowRight />
           </button>
         </div>
-      </div>
+      </section>
 
-      <footer>
-        <div className="footer-logo">
-          <span className="footer-logo-mark">P</span> Prepply
+      {/* FOOTER */}
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-logo">
+            <span>Prepply</span>
+          </div>
+          <div className="footer-copyright">
+            © 2026 Prepply. All rights reserved.
+          </div>
         </div>
-        <span>© 2026 Prepply. All rights reserved.</span>
       </footer>
     </div>
   );
