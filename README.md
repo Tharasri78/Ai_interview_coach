@@ -1,123 +1,244 @@
 
+# AI Interview Coach
+
+An AI-powered system that helps users practice interview questions using their own study materials.  
+The platform generates questions from uploaded PDFs and evaluates answers using a Retrieval-Augmented Generation (RAG) pipeline.
+
+---
+
+# Project Structure
+
+backend/ — FastAPI server, RAG pipeline, evaluation logic  
+frontend/ — React application (user interface)  
+vector_store/ — FAISS index (embeddings storage)  
+uploads/ — uploaded PDFs  
+
+---
+
+# Key Features
+
+• Upload PDF documents (resume, notes, study material)  
+• Topic-based question generation  
+• AI-based answer evaluation (technical accuracy, depth, clarity)  
+• RAG pipeline for context-aware questions  
+• Fallback question generation when no document context is found  
+• History tracking of past attempts  
+• Performance summary and scoring  
+
+---
+
+# Tech Stack
+
+## Backend
+- FastAPI  
+- Python  
+- FAISS (vector database)  
+- LangChain (RAG pipeline)  
+
+## Frontend
+- React  
+- Axios  
+- CSS  
+
+## AI / GenAI
+- LLM integration for question generation  
+- RAG (Retrieval-Augmented Generation)  
+- Embeddings for document retrieval  
+
+---
+
+# Requirements
+
+- Python 3.9+  
+- Node.js 16+  
+- npm  
+- API key for LLM (OpenAI / compatible provider)  
+
+---
+
+# Backend — Setup & Run
+
+Go to backend:
+
 ```
-#  Prepply - AI-Powered Interview Coach
 
-Prepply is an intelligent interview preparation platform that generates personalized questions from your learning materials and provides instant AI feedback on your answers.
+cd backend
 
-##  Features
-
--  **Upload Learning Materials** - Upload PDF documents to extract relevant concepts
--  **Topic-Based Questions** - Generate questions on specific topics from your materials
--  **AI Answer Evaluation** - Get scored feedback on technical accuracy, depth, and clarity
--  **Performance Tracking** - View detailed history and performance summaries
--  **Adaptive Difficulty** - Questions adjust to your skill level (Easy/Medium/Hard)
--  **Gap Identification** - Understand missing concepts in your answers
--  **Follow-up Questions** - Get deeper questions based on your responses
-
-## 🛠️ Tech Stack
-
-### Frontend
-- React.js with Hooks
-- CSS3 with modern styling
-- Framer Motion for animations
-- React Icons
-
-### Backend
-- FastAPI (Python)
-- SQLAlchemy ORM
-- SQLite/PostgreSQL
-
-### AI & ML
-- LangChain for RAG (Retrieval Augmented Generation)
-- FAISS for vector storage
-- HuggingFace Embeddings
-- LLM integration for question generation & evaluation
-
-##  Getting Started
-
-### Prerequisites
-
-```bash
-Python 3.9+
-Node.js 16+
-npm or yarn
 ```
 
-### Backend Setup
+Install dependencies:
 
-```bash
-# Clone the repository
-git clone https://github.com/Tharasri78/Ai_interview_coach
-cd prepply
+```
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
 
-# Run the server
-uvicorn app.main:app --reload
 ```
 
-### Frontend Setup
+Create `.env` file:
 
-```bash
+```
+
+OPENAI_API_KEY=your_api_key
+DATABASE_URL=sqlite:///./app.db
+
+```
+
+Run server:
+
+```
+
+uvicorn main:app --reload
+
+```
+
+Server runs on:
+
+```
+
+[http://localhost:8000](http://localhost:8000)
+
+```
+
+---
+
+# Frontend — Setup & Run
+
+Go to frontend:
+
+```
+
 cd frontend
+
+```
+
+Install dependencies:
+
+```
+
 npm install
-npm start
-```
-
-##  Project Structure
 
 ```
-prepply/
-├── app/
-│   ├── api/              # API endpoints
-│   │   ├── auth.py       # Authentication
-│   │   ├── answer.py     # Answer submission
-│   │   ├── question.py   # Question generation
-│   │   ├── history.py    # User history
-│   │   ├── summary.py    # Performance summary
-│   │   └── upload.py     # PDF upload
-│   ├── core/             # Core services
-│   │   └── llm.py        # LLM integration
-│   ├── db/               # Database
-│   │   ├── database.py   # DB connection
-│   │   └── models.py     # SQLAlchemy models
-│   └── services/         # Business logic
-│       ├── evaluation_service.py
-│       ├── question_service.py
-│       ├── rag_service.py
-│       └── difficulty_service.py
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Auth.jsx
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── Summary.jsx
-│   │   │   ├── Upload.jsx
-│   │   │   ├── Question.jsx
-│   │   │   └── Answer.jsx
-│   │   ├── api/
-│   │   │   └── apiService.js
-│   │   └── styles/
-│   └── public/
-└── requirements.txt
+
+Start app:
+
 ```
 
-## Usage
+npm run dev
 
-1. **Sign Up / Login** - Create your account
-2. **Upload PDF** - Upload your learning material (resume, notes, study guide)
-3. **Generate Question** - Enter a topic to get an AI-generated question
-4. **Submit Answer** - Write your answer and get instant feedback
-5. **Review History** - Track your progress over time
-6. **View Summary** - See your strengths and weaknesses
+```
 
+Frontend runs on:
 
+```
 
+[http://localhost:5173](http://localhost:5173)
 
+```
 
+---
+
+# System Flow
+
+```
+
+User → Upload PDF
+↓
+Frontend → FastAPI Backend
+↓
+Text Extraction → Embeddings → FAISS
+↓
+RAG Retrieval → LLM
+↓
+Question Generation / Answer Evaluation
+
+```
+
+---
+
+# API Overview
+
+## Question
+
+```
+
+POST /generate-question
+
+```
+
+Generate a question based on topic and document context  
+
+## Answer
+
+```
+
+POST /submit-answer
+
+```
+
+Evaluate answer and return score + feedback  
+
+## History
+
+```
+
+GET /history/{user_id}
+
+```
+
+Retrieve past attempts  
+
+## Summary
+
+```
+
+GET /summary/{user_id}
+
+```
+
+Performance insights  
+
+---
+
+# Environment Variables
+
+## Backend
+
+```
+
+OPENAI_API_KEY=your_api_key
+DATABASE_URL=your_database_url
+
+```
+
+## Frontend
+
+```
+
+VITE_API_BASE_URL=[http://localhost:8000](http://localhost:8000)
+
+```
+
+---
+
+# Deployment Notes
+
+- Ensure backend is deployed with HTTPS  
+- Update frontend API base URL accordingly  
+- Use persistent storage for FAISS index in production  
+
+---
+
+# Author
+
+Thara Sri  
+
+GitHub  
+https://github.com/Tharasri78  
+
+---
+
+# License
+
+This project is developed for learning and portfolio purposes.
+```
 
