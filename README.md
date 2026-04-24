@@ -1,92 +1,113 @@
 
-```
-#  Prepply - AI-Powered Interview Coach
 
-Prepply is an intelligent interview preparation platform that generates personalized questions from your learning materials and provides instant AI feedback on your answers.
+---
 
-##  Features
+```md
+# Prepply — AI-Powered Interview Coach
 
--  **Upload Learning Materials** - Upload PDF documents to extract relevant concepts
--  **Topic-Based Questions** - Generate questions on specific topics from your materials
--  **AI Answer Evaluation** - Get scored feedback on technical accuracy, depth, and clarity
--  **Performance Tracking** - View detailed history and performance summaries
--  **Adaptive Difficulty** - Questions adjust to your skill level (Easy/Medium/Hard)
--  **Gap Identification** - Understand missing concepts in your answers
--  **Follow-up Questions** - Get deeper questions based on your responses
+Prepply is an AI-driven interview preparation system that generates **context-aware technical questions from user-provided materials** and delivers **adaptive evaluation with actionable performance insights**.
 
-## 🛠️ Tech Stack
+---
+
+## Overview
+
+Prepply transforms interview practice into a **personalized feedback loop system**:
+
+- Questions are generated from your own content (PDFs)  
+- Difficulty adapts based on performance  
+- Feedback improves future questions  
+
+---
+
+## Features
+
+- **Upload Learning Materials**  
+  Upload PDF documents to extract relevant concepts  
+
+- **Topic-Based Question Generation**  
+  Generate questions from your materials using RAG  
+
+- **AI Answer Evaluation**  
+  Get feedback on:
+  - Technical accuracy  
+  - Depth  
+  - Clarity  
+
+- **Adaptive Difficulty**  
+  Questions adjust automatically (Easy → Medium → Hard)  
+
+- **Performance Tracking**  
+  View history and score breakdown  
+
+- **Performance Summary**  
+  - Overall score  
+  - Strong vs weak areas  
+  - Topic insights  
+
+- **Follow-up Questions**  
+  Get deeper questions based on your answers  
+
+- **Fallback Handling**  
+  Uses general knowledge when PDF context is unavailable  
+
+---
+
+## Tech Stack
 
 ### Frontend
-- React.js with Hooks
-- CSS3 with modern styling
-- Framer Motion for animations
+- React.js (Hooks)
+- CSS3 (Custom UI)
+- Framer Motion
 - React Icons
 
 ### Backend
-- FastAPI (Python)
+- FastAPI
 - SQLAlchemy ORM
-- SQLite/PostgreSQL
+- SQLite / PostgreSQL
 
 ### AI & ML
-- LangChain for RAG (Retrieval Augmented Generation)
-- FAISS for vector storage
+- LangChain (RAG pipeline)
+- FAISS (Vector Store)
 - HuggingFace Embeddings
-- LLM integration for question generation & evaluation
+- LLM API (Question generation & evaluation)
 
-##  Getting Started
+---
 
-### Prerequisites
-
-```bash
-Python 3.9+
-Node.js 16+
-npm or yarn
-```
-
-### Backend Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/Tharasri78/Ai_interview_coach
-cd prepply
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the server
-uvicorn app.main:app --reload
-```
-
-### Frontend Setup
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
-##  Project Structure
+## System Workflow
 
 ```
+
+PDF Upload → Embedding → Vector Store
+↓
+Topic Input → Semantic Retrieval → Question Generation
+↓
+User Answer → AI Evaluation → Score Storage
+↓
+Difficulty Adjustment → Next Question
+
+```
+
+---
+
+## Project Structure
+
+```
+
 prepply/
 ├── app/
-│   ├── api/              # API endpoints
-│   │   ├── auth.py       # Authentication
-│   │   ├── answer.py     # Answer submission
-│   │   ├── question.py   # Question generation
-│   │   ├── history.py    # User history
-│   │   ├── summary.py    # Performance summary
-│   │   └── upload.py     # PDF upload
-│   ├── core/             # Core services
-│   │   └── llm.py        # LLM integration
-│   ├── db/               # Database
-│   │   ├── database.py   # DB connection
-│   │   └── models.py     # SQLAlchemy models
-│   └── services/         # Business logic
+│   ├── api/
+│   │   ├── auth.py
+│   │   ├── answer.py
+│   │   ├── question.py
+│   │   ├── history.py
+│   │   ├── summary.py
+│   │   └── upload.py
+│   ├── core/
+│   │   └── llm.py
+│   ├── db/
+│   │   ├── database.py
+│   │   └── models.py
+│   └── services/
 │       ├── evaluation_service.py
 │       ├── question_service.py
 │       ├── rag_service.py
@@ -105,19 +126,76 @@ prepply/
 │   │   └── styles/
 │   └── public/
 └── requirements.txt
+
 ```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+```
+
+Python 3.9+
+Node.js 16+
+npm or yarn
+
+````
+
+---
+
+### Backend Setup
+
+```bash
+git clone https://github.com/Tharasri78/Ai_interview_coach
+cd prepply
+
+python -m venv venv
+venv\Scripts\activate
+
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+````
+
+---
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+---
 
 ## Usage
 
-1. **Sign Up / Login** - Create your account
-2. **Upload PDF** - Upload your learning material (resume, notes, study guide)
-3. **Generate Question** - Enter a topic to get an AI-generated question
-4. **Submit Answer** - Write your answer and get instant feedback
-5. **Review History** - Track your progress over time
-6. **View Summary** - See your strengths and weaknesses
+1. Sign up / login
+2. Upload a PDF (resume, notes, study material)
+3. Enter a topic
+4. Generate a question
+5. Submit your answer
+6. Get AI evaluation
+7. Track history and view summary
+
+---
+
+## What Makes This Project Different
+
+* Uses user-specific data instead of generic questions
+* Implements adaptive difficulty based on performance
+* Combines generation, evaluation, and feedback loop
+* Provides actionable insights, not just scores
 
 
+---
 
+## Conclusion
 
+Prepply is a **context-aware, adaptive interview system** designed to simulate real interview scenarios and improve actual performance.
+
+```
 
 
