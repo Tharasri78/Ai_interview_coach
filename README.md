@@ -1,279 +1,155 @@
 
-Got it. You don’t want fancy “AI hype” — you want **clean, structured, professional like that tracker README**.
-
-Here’s your **Prepply README rewritten in the exact same style** 👇 (copy-paste ready)
-
 ---
 
 ```md
-# Prepply - AI Interview Coach
+# Prepply — AI Interview Coach
 
-A full-stack AI-powered application designed to help users practice and improve their interview skills through **personalized question generation and structured feedback**.
+<p align="center">
+  <b>AI-powered interview preparation system using RAG + adaptive evaluation</b>
+</p>
 
-The platform allows users to **upload learning materials, generate topic-based questions, submit answers, and track performance** through a centralized dashboard.
-
-The project demonstrates **LLM integration, Retrieval-Augmented Generation (RAG), adaptive difficulty logic, and full-stack development using modern technologies.**
-
----
-
-# Live Application
-
-Live Application  
-https://your-live-link.com  
-
-Demo  
-https://your-demo-link.com  
+<p align="center">
+  <img src="https://img.shields.io/badge/Frontend-React-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Backend-FastAPI-green?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/AI-RAG%20%7C%20LLM-purple?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Database-SQLite-orange?style=for-the-badge" />
+</p>
 
 ---
 
-# Key Features
+## Overview
 
-• PDF-based question generation using user content  
-• Topic-based question input system  
-• AI-powered answer evaluation  
+Prepply is a full-stack AI system that generates **context-aware interview questions from user-provided materials** and evaluates answers using a **multi-dimensional scoring model**.
 
-• Scoring based on:
-* Technical accuracy  
-* Depth  
-* Clarity  
-
-• Adaptive difficulty system  
-* Easy  
-* Medium  
-* Hard  
-
-• Performance tracking system  
-• History of past attempts  
-• Summary dashboard  
-
-• Strong and weak area identification  
-• Topic-wise performance insights  
-• Fallback question handling (when no PDF context is found)  
+Unlike static interview tools, it creates a **continuous feedback loop**:
+- Generate → Answer → Evaluate → Improve → Repeat
 
 ---
 
-# Tech Stack
+## Key Features
 
-## Frontend
+- **Context-Aware Question Generation (RAG)**  
+  Generates questions from uploaded PDFs  
 
-* React.js  
-* Vite  
-* Axios  
-* Framer Motion  
-* CSS  
+- **Adaptive Difficulty Engine**  
+  Automatically adjusts complexity (Easy → Medium → Hard)  
 
-## Backend
+- **AI Answer Evaluation**  
+  - Technical accuracy  
+  - Depth of explanation  
+  - Clarity  
 
-* FastAPI  
-* SQLAlchemy  
-* REST APIs  
+- **Performance Tracking**  
+  - History of attempts  
+  - Score breakdown  
 
-## Database
+- **Summary Dashboard**  
+  - Strong vs weak areas  
+  - Topic-wise insights  
 
-* SQLite  
-
-## AI & ML
-
-* LangChain (RAG)  
-* FAISS (Vector Store)  
-* HuggingFace Embeddings  
-* LLM API  
-
-## Deployment
-
-* Frontend: (Add your platform)  
-* Backend: (Add your platform)  
+- **Fallback Handling**  
+  Generates general questions when context is unavailable  
 
 ---
 
-# System Architecture
+## System Architecture
 
 ```
 
-React Client
-│
-▼
-FastAPI Backend
-│
-▼
-Vector Store (FAISS) + Database
-│
-▼
-LLM (Question Generation + Evaluation)
-
-```
-
-1. The frontend handles user interaction and UI.  
-2. The backend processes requests and manages logic.  
-3. Vector store retrieves relevant document context.  
-4. LLM generates questions and evaluates answers.  
-
----
-
-# Project Structure
-
-## Frontend
-
-```
-
-frontend
-└── src
-├── components
-├── pages
-├── api
-└── styles
-
-```
-
-## Backend
-
-```
-
-backend
-└── app
-├── api
-├── services
-├── db
-└── core
+User Input
+↓
+Topic Processing
+↓
+Vector Retrieval (FAISS)
+↓
+LLM Question Generation
+↓
+User Answer
+↓
+LLM Evaluation
+↓
+Score + Feedback
+↓
+Adaptive Difficulty Update
 
 ```
 
 ---
 
-# Environment Variables
+## Tech Stack
 
-## Backend
+### Frontend
+- React.js  
+- Vite  
+- Axios  
+- Framer Motion  
+- CSS  
 
-```
+### Backend
+- FastAPI  
+- SQLAlchemy  
 
-DATABASE_URL=your_database_url
-LLM_API_KEY=your_api_key
+### Database
+- SQLite  
 
-```
-
----
-
-# Installation & Setup
-
-## 1. Clone Repository
-
-```
-
-git clone [https://github.com/Tharasri78/Ai_interview_coach](https://github.com/Tharasri78/Ai_interview_coach)
-cd Ai_interview_coach
-
-```
+### AI & ML
+- LangChain (RAG pipeline)  
+- FAISS (Vector Store)  
+- HuggingFace Embeddings  
+- LLM API  
 
 ---
 
-## 2. Run Backend
+## Project Structure
 
 ```
 
-cd backend
+prepply/
+├── backend/
+│   ├── api/
+│   ├── services/
+│   ├── db/
+│   └── core/
+├── frontend/
+│   ├── components/
+│   ├── pages/
+│   ├── api/
+│   └── styles/
+
+````
+
+---
+
+## Installation
+
+### Backend
+```bash
 pip install -r requirements.txt
 uvicorn app.main:app --reload
+````
 
-```
+### Frontend
 
-Backend runs on:
-```
-
-[http://localhost:8000](http://localhost:8000)
-
-```
-
----
-
-## 3. Run Frontend
-
-```
-
-cd frontend
+```bash
 npm install
 npm run dev
-
-```
-
-Frontend runs on:
-```
-
-[http://localhost:5173](http://localhost:5173)
-
 ```
 
 ---
 
-# API Endpoints
+## What Makes This Different
 
-## Question
-
-```
-
-GET /generate-question/
-
-```
-
-## Answer
-
-```
-
-POST /submit-answer/
-
-```
-
-## History
-
-```
-
-GET /history/{user_id}
-
-```
-
-## Summary
-
-```
-
-GET /summary/{user_id}
-
-```
+* Uses **user-specific data instead of generic questions**
+* Implements **adaptive interview flow**
+* Combines **RAG + evaluation + feedback loop**
+* Provides **actionable improvement insights**
 
 ---
 
-# Author
+## Author
 
-Thara Sri  
-
-GitHub  
-https://github.com/Tharasri78  
+Thara Sri
+[https://github.com/Tharasri78](https://github.com/Tharasri78)
 
 ---
 
-# License
-
-This project is developed for learning and portfolio purposes.
-```
-
----
-
-# ⚠️ Straight feedback
-
-This version:
-
-* clean like your example ✔
-* structured ✔
-* readable ✔
-* not overhyped ✔
-
-But still:
-👉 shows AI (RAG, LLM)
-👉 shows system thinking
-
----
-
-If you want to push further:
-
-👉 say **"add screenshot section clean"**
-👉 or **"make this resume project description"**
-
-That’s where real impact comes.
