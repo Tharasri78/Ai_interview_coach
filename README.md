@@ -1,3 +1,8 @@
+
+
+---
+
+```md
 # Prepply - AI Interview Coach
 
 A full-stack AI-powered application designed to help users practice and improve their interview skills through personalized question generation and structured feedback.
@@ -8,10 +13,7 @@ The project demonstrates LLM integration, Retrieval-Augmented Generation (RAG), 
 
 ---
 
-# Live Application
-
-Live Application  
-https://your-live-link.com  
+# Link
 
 Demo  
 https://your-demo-link.com  
@@ -71,11 +73,93 @@ https://your-demo-link.com
 * HuggingFace Embeddings  
 * LLM API  
 
-## Deployment
-
-* Frontend: (Add your platform)  
-* Backend: (Add your platform)  
 
 ---
 
 # System Architecture
+
+```
+
+React Client
+│
+▼
+FastAPI Backend
+│
+▼
+Vector Store (FAISS) + Database
+│
+▼
+LLM (Question Generation + Evaluation)
+
+```
+
+1. The frontend handles user interaction and UI.  
+2. The backend processes requests and manages logic.  
+3. Vector store retrieves relevant document context.  
+4. LLM generates questions and evaluates answers.  
+
+---
+
+# Installation & Setup
+
+## 1. Clone Repository
+
+```
+
+git clone [https://github.com/Tharasri78/Ai_interview_coach](https://github.com/Tharasri78/Ai_interview_coach)
+cd Ai_interview_coach
+
+```
+
+---
+
+## 2. Run Backend
+
+```
+
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+```
+
+Backend runs on:
+
+```
+
+[http://localhost:8000](http://localhost:8000)
+
+```
+
+---
+
+## 3. Run Frontend
+
+```
+
+cd frontend
+npm install
+npm run dev
+
+```
+
+Frontend runs on:
+
+```
+
+[http://localhost:5173](http://localhost:5173)
+
+```
+
+---
+
+
+
+# Author
+
+Thara Sri  
+https://github.com/Tharasri78  
+
+---
+
+
