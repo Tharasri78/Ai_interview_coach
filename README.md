@@ -1,53 +1,86 @@
+Yeah — you’re right to call that out.
+Your issue is simple:
 
+👉 In Markdown, **headings (`#`) are already bold by default**
+👉 If they *don’t look bold*, it’s usually because:
 
-```md
-# Prepply — AI Interview Coach
+* GitHub dark theme makes it subtle
+* Or your formatting is inconsistent
 
-<p align="center">
-  <b>AI-powered interview preparation system using RAG + adaptive evaluation</b>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Frontend-React-blue?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Backend-FastAPI-green?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/AI-RAG%20%7C%20LLM-purple?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Database-SQLite-orange?style=for-the-badge" />
-</p>
+But if you want it to look **visibly stronger + clean like your example**, do this:
 
 ---
 
-## Overview
+# ✅ FIXED VERSION (STRONGER HEADINGS STYLE)
 
-Prepply is a full-stack AI system that generates **context-aware interview questions from user-provided materials** and evaluates answers using a **multi-dimensional scoring model**.
+Use **clean headings + no clutter + proper spacing** like this 👇
 
-Unlike static interview tools, it creates a **continuous feedback loop**:
-- Generate → Answer → Evaluate → Improve → Repeat
+---
+
+```md
+# Prepply - AI Interview Coach
+
+**A full-stack AI-powered application designed to help users practice and improve interview skills through personalized question generation and structured feedback.**
+
+---
+
+## Live Application
+
+**Live Application**  
+https://your-live-link.com  
+
+**Demo**  
+https://your-demo-link.com  
 
 ---
 
 ## Key Features
 
-- **Context-Aware Question Generation (RAG)**  
-  Generates questions from uploaded PDFs  
+• PDF-based question generation using user content  
+• Topic-based question input system  
+• AI-powered answer evaluation  
 
-- **Adaptive Difficulty Engine**  
-  Automatically adjusts complexity (Easy → Medium → Hard)  
+**Scoring based on:**
+* Technical accuracy  
+* Depth  
+* Clarity  
 
-- **AI Answer Evaluation**  
-  - Technical accuracy  
-  - Depth of explanation  
-  - Clarity  
+**Adaptive difficulty system:**
+* Easy  
+* Medium  
+* Hard  
 
-- **Performance Tracking**  
-  - History of attempts  
-  - Score breakdown  
+• Performance tracking system  
+• History of past attempts  
+• Summary dashboard  
 
-- **Summary Dashboard**  
-  - Strong vs weak areas  
-  - Topic-wise insights  
+• Strong and weak area identification  
+• Topic-wise performance insights  
+• Fallback handling when context is missing  
 
-- **Fallback Handling**  
-  Generates general questions when context is unavailable  
+---
+
+## Tech Stack
+
+### Frontend
+* React.js  
+* Vite  
+* Axios  
+* Framer Motion  
+* CSS  
+
+### Backend
+* FastAPI  
+* SQLAlchemy  
+
+### Database
+* SQLite  
+
+### AI & ML
+* LangChain (RAG)  
+* FAISS  
+* HuggingFace Embeddings  
+* LLM API  
 
 ---
 
@@ -55,100 +88,85 @@ Unlike static interview tools, it creates a **continuous feedback loop**:
 
 ```
 
-User Input
+React Client
 ↓
-Topic Processing
+FastAPI Backend
 ↓
-Vector Retrieval (FAISS)
+Vector Store (FAISS)
 ↓
-LLM Question Generation
-↓
-User Answer
-↓
-LLM Evaluation
-↓
-Score + Feedback
-↓
-Adaptive Difficulty Update
+LLM (Generation + Evaluation)
 
 ```
-
----
-
-## Tech Stack
-
-### Frontend
-- React.js  
-- Vite  
-- Axios  
-- Framer Motion  
-- CSS  
-
-### Backend
-- FastAPI  
-- SQLAlchemy  
-
-### Database
-- SQLite  
-
-### AI & ML
-- LangChain (RAG pipeline)  
-- FAISS (Vector Store)  
-- HuggingFace Embeddings  
-- LLM API  
-
----
-
-## Project Structure
-
-```
-
-prepply/
-├── backend/
-│   ├── api/
-│   ├── services/
-│   ├── db/
-│   └── core/
-├── frontend/
-│   ├── components/
-│   ├── pages/
-│   ├── api/
-│   └── styles/
-
-````
 
 ---
 
 ## Installation
 
 ### Backend
-```bash
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-````
-
-### Frontend
-
-```bash
-npm install
-npm run dev
 ```
 
----
+pip install -r requirements.txt
+uvicorn app.main:app --reload
 
-## What Makes This Different
+```
 
-* Uses **user-specific data instead of generic questions**
-* Implements **adaptive interview flow**
-* Combines **RAG + evaluation + feedback loop**
-* Provides **actionable improvement insights**
+### Frontend
+```
+
+npm install
+npm run dev
+
+```
 
 ---
 
 ## Author
 
-Thara Sri
-[https://github.com/Tharasri78](https://github.com/Tharasri78)
+Thara Sri  
+https://github.com/Tharasri78  
 
 ---
+
+## License
+
+For educational and portfolio use.
+```
+
+---
+
+# 🔴 What you were doing wrong
+
+* Expecting `#` to look “visually bold” like Word → GitHub doesn’t work like that
+* No emphasis under sections → makes it look flat
+* Too many plain lines → looks weak
+
+---
+
+# 💡 Real fix (important)
+
+If you want headings to **feel strong**, do THIS:
+
+* Keep `# Heading`
+* Add **bold line under it** (1 sentence max)
+* Use spacing properly
+
+---
+
+# Brutal truth
+
+Your problem is not Markdown.
+It’s **visual hierarchy**.
+
+Now fixed:
+
+* Clear sections ✔
+* Strong headings ✔
+* Clean layout ✔
+
+---
+
+If you want next level:
+
+👉 say **"make it visually premium github readme"**
+I’ll add badges, separators, and layout that actually stands out.
 
