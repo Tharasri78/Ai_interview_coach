@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { uploadPDF } from "../api/apiService";
 import { FiUpload, FiFile, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 
@@ -8,6 +8,16 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
   const [msg, setMsg] = useState("");
   const [status, setStatus] = useState(null);
   const inputRef = useRef();
+
+  // Clear stale localStorage on component mount
+  useEffect(() => {
+    // Remove any stale upload flags
+    const staleFlag = localStorage.getItem("uploaded");
+    if (staleFlag === "true") {
+      console.log("Clearing stale upload flag from localStorage");
+      localStorage.removeItem("uploaded");
+    }
+  }, []);
 
   const handleFile = (f) => {
     if (f?.type === "application/pdf") {
@@ -29,12 +39,19 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
     try {
       const res = await uploadPDF(userId, formData);
 
-      if (res.data?.message || res.status === 200) {
-        setMsg("File uploaded successfully!");
+      if (res.data?.status === "success" || res.status === 200) {
+        setMsg("PDF uploaded successfully");
         setStatus("success");
+        localStorage.setItem("uploaded", "true");
+        localStorage.setItem("uploaded_file_name", file.name);
         onUploaded(true);
+        setFile(null); // Clear file after successful upload
+      } else {
+        setMsg("Upload failed. Please try again.");
+        setStatus("error");
       }
-    } catch {
+    } catch (err) {
+      console.error("Upload error:", err);
       setMsg("Upload failed. Please try again.");
       setStatus("error");
     }
@@ -46,25 +63,26 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
     <div className="card">
       <div className="card-header">
         <div>
-          <div className="card-title">Upload PDF</div>
+          <div className="card-title">Resume Upload</div>
           <div className="card-sub">
             {isUploaded 
-              ? "PDF uploaded — you're ready to practice!" 
-              : "Step 1 — Upload your learning material (PDF only)"}
+              ? "Resume ready - you can begin your interview preparation" 
+              : "Upload your resume (PDF format only)"}
           </div>
         </div>
         {status === "success" && <span className="card-badge badge-success">Uploaded</span>}
       </div>
 
       <div 
-        className={`upload-dropzone ${file ? "has-file" : ""}`}
-        onClick={() => inputRef.current?.click()}
+        className={`upload-dropzone ${file ? "has-file" : ""} ${isUploaded ? "disabled" : ""}`}
+        onClick={() => !isUploaded && inputRef.current?.click()}
+        style={{ cursor: isUploaded ? "not-allowed" : "pointer", opacity: isUploaded ? 0.6 : 1 }}
       >
         {!file ? (
           <>
             <div className="upload-icon"><FiUpload size={24} /></div>
             <div className="upload-text">Click to upload <strong>PDF</strong></div>
-            <div className="upload-hint">Supports .pdf files only</div>
+            <div className="upload-hint">Maximum file size: 10MB</div>
           </>
         ) : (
           <>
@@ -83,7 +101,7 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
         onChange={(e) => handleFile(e.target.files[0])}
       />
 
-      {file && (
+      {file && !isUploaded && (
         <button 
           onClick={handleUpload} 
           className="btn btn-primary btn-full"
@@ -104,11 +122,7 @@ export default function Upload({ userId, onUploaded, isUploaded }) {
         </div>
       )}
       
-      {isUploaded && !file && (
-        <div className="msg msg-info">
-          Your PDF is already uploaded. You can upload a new one anytime to update your learning material.
-        </div>
-      )}
+      
     </div>
   );
 }

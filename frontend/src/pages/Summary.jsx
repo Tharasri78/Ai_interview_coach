@@ -68,7 +68,6 @@ export default function Summary() {
                   navigate("/summary");
                 } else if (item.key === "history") {
                   navigate("/dashboard?tab=history");
-                  window.location.reload();
                 } else {
                   navigate("/dashboard");
                 }
@@ -118,7 +117,7 @@ export default function Summary() {
               sidebar?.classList.toggle('mobile-open');
             }}
           >
-            
+            ☰
           </button>
         </div>
 
@@ -137,10 +136,10 @@ export default function Summary() {
           )}
 
           {/* NO DATA STATE */}
-          {!summaryLoading && !summary && (
+          {!summaryLoading && (!summary || summary.total === 0) && (
             <div className="card">
               <div className="msg msg-info">
-                No data available yet. Complete a practice session to see your performance summary.
+                📊 No data available yet. Complete a practice session to see your performance summary.
               </div>
               <button
                 className="btn btn-primary btn-full"
@@ -153,22 +152,24 @@ export default function Summary() {
           )}
 
           {/* SUMMARY CONTENT */}
-          {summary && (
+          {summary && summary.total > 0 && (
             <>
               {/* Row 1: Overall Score */}
               <div className="summary-card">
                 <div className="overall-score-wrapper">
-                  <div className="score-ring">
+                  <div className="score-ring" style={{
+                    background: `conic-gradient(#4F46E5 ${(summary.avg_score / 10) * 360}deg, #E8E9EF 0deg)`
+                  }}>
                     <div className="score-ring-inner">
-                      <span className="score-number">{((summary.avg_score || 0) * 10).toFixed(0)}</span>
-                      <span className="score-total">/100</span>
+                      <span className="score-number">{summary.avg_score ? summary.avg_score.toFixed(1) : "0"}</span>
+                      <span className="score-total">/10</span>
                     </div>
                   </div>
                   <div className="overall-stats">
                     <h2 className="overall-title">Overall Performance</h2>
-                    <p className="overall-attempts">{summary.total || 0} total answers</p>
+                    <p className="overall-attempts">{summary.total} total answers</p>
                     <div className="overall-level">
-                      {summary.avg_score >= 7 ? "Advanced" : summary.avg_score >= 5 ? "Intermediate" : "Beginner"}
+                      {summary.avg_score >= 7 ? "🎯 Advanced" : summary.avg_score >= 5 ? "📈 Intermediate" : "🌱 Beginner"}
                     </div>
                   </div>
                 </div>
@@ -192,7 +193,7 @@ export default function Summary() {
                   <div className="skill-item">
                     <div className="skill-header">
                       <span className="skill-label">Technical Accuracy</span>
-                      <span className="skill-score">{summary.breakdown?.technical?.toFixed(2) || 0}/10</span>
+                      <span className="skill-score">{summary.breakdown?.technical?.toFixed(1) || 0}/10</span>
                     </div>
                     <div className="progress-bar">
                       <div 
@@ -205,7 +206,7 @@ export default function Summary() {
                   <div className="skill-item">
                     <div className="skill-header">
                       <span className="skill-label">Depth of Knowledge</span>
-                      <span className="skill-score">{summary.breakdown?.depth?.toFixed(2) || 0}/10</span>
+                      <span className="skill-score">{summary.breakdown?.depth?.toFixed(1) || 0}/10</span>
                     </div>
                     <div className="progress-bar">
                       <div 
@@ -218,7 +219,7 @@ export default function Summary() {
                   <div className="skill-item">
                     <div className="skill-header">
                       <span className="skill-label">Clarity & Structure</span>
-                      <span className="skill-score">{summary.breakdown?.clarity?.toFixed(2) || 0}/10</span>
+                      <span className="skill-score">{summary.breakdown?.clarity?.toFixed(1) || 0}/10</span>
                     </div>
                     <div className="progress-bar">
                       <div 
@@ -270,7 +271,7 @@ export default function Summary() {
 
                 {(summary.suggestions || []).length > 0 && (
                   <div className="recommendations-box">
-                    <div className="recommendations-title">Recommendations</div>
+                    <div className="recommendations-title">📝 Recommendations</div>
                     {summary.suggestions.map((tip, index) => (
                       <div key={index} className="recommendation-item">
                         <span className="bullet">→</span> {tip}
@@ -280,41 +281,7 @@ export default function Summary() {
                 )}
               </div>
 
-              {/* Row 4: Topic Performance (if available) */}
-              {summary.topics && Object.keys(summary.topics).length > 0 && (
-                <div className="summary-card">
-                  <div className="card-header">
-                    <div className="card-title-group">
-                      <div className="card-icon green">
-                        <FaChartBar />
-                      </div>
-                      <div>
-                        <div className="card-title">Topic Performance</div>
-                        <div className="card-sub">How you perform across different topics</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="topics-list">
-                    {Object.entries(summary.topics).map(([topic, score]) => (
-                      <div key={topic} className="topic-item">
-                        <span className="topic-name">{topic.charAt(0).toUpperCase() + topic.slice(1)}</span>
-                        <div className="topic-score-wrapper">
-                          <div className="topic-progress">
-                            <div 
-                              className="topic-progress-fill"
-                              style={{ width: `${(score / 10) * 100}%` }}
-                            />
-                          </div>
-                          <span className="topic-score">{score.toFixed(1)}/10</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Row 5: Quick Action */}
+              {/* Row 4: Quick Action */}
               <div className="summary-card quick-action">
                 <div className="quick-action-wrapper">
                   <div>
@@ -322,7 +289,7 @@ export default function Summary() {
                     <p>Continue practicing to track your progress and level up.</p>
                   </div>
                   <button className="btn btn-primary" onClick={() => navigate("/dashboard")}>
-                    Start Practice
+                    Start Practice →
                   </button>
                 </div>
               </div>
@@ -342,7 +309,6 @@ export default function Summary() {
                     navigate("/summary");
                   } else if (item.key === "history") {
                     navigate("/dashboard?tab=history");
-                    window.location.reload();
                   } else {
                     navigate("/dashboard");
                   }

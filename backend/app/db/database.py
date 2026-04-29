@@ -5,7 +5,8 @@ DATABASE_URL = "sqlite:///./interview.db"
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False}  # needed for SQLite
+    connect_args={"check_same_thread": False},
+    echo=False  # avoid noisy logs
 )
 
 SessionLocal = sessionmaker(

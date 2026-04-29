@@ -1,79 +1,139 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import text
-from collections import defaultdict
+# app/services/summary_service.py
+from app.db.database import SessionLocal
+from app.db.models import Answer
+from datetime import datetime
+
+def save_answer_to_db(user_id, question, answer, scores):
+    """Save answer to database"""
+    db = SessionLocal()
+    try:
+        answer_record = Answer(
+            user_id=user_id,
+            question=question,
+            answer=answer,
+            technical=scores.get("technical", 0),
+            depth=scores.get("depth", 0),
+            clarity=scores.get("clarity", 0),
+            overall=scores.get("overall", 0),
+            created_at=datetime.utcnow()
+        )
+        db.add(answer_record)
+        db.commit()
+        return True
+    except Exception as e:
+        print(f"Save answer error: {e}")
+        db.rollback()
+        return False
+    finally:
+        db.close()
 
 
-def get_summary(db: Session, user_id: int):
-    rows = db.execute(
-        text("""
-        SELECT question, technical, depth, clarity, overall
-        FROM answers
-        WHERE user_id = :uid
-        """),
-        {"uid": user_id}
-    ).fetchall()
-
-    if not rows:
-        return None
-
-    total = len(rows)
-
-    tech_avg = sum(r.technical for r in rows) / total
-    depth_avg = sum(r.depth for r in rows) / total
-    clarity_avg = sum(r.clarity for r in rows) / total
-    overall_avg = sum(r.overall for r in rows) / total
-
-    # 🔥 Topic detection (simple keyword grouping)
-    topic_scores = defaultdict(list)
-
-    for r in rows:
-        q = r.question.lower()
-
-        if "stack" in q:
-            topic_scores["stack"].append(r.overall)
-        elif "linked list" in q:
-            topic_scores["linked list"].append(r.overall)
-        elif "react" in q:
-            topic_scores["react"].append(r.overall)
-        elif "array" in q:
-            topic_scores["array"].append(r.overall)
-        else:
-            topic_scores["general"].append(r.overall)
-
-    topic_summary = {
-        t: round(sum(v)/len(v), 2) for t, v in topic_scores.items()
-    }
-
-    strong = max(
-        {"technical": tech_avg, "depth": depth_avg, "clarity": clarity_avg},
-        key=lambda x: {"technical": tech_avg, "depth": depth_avg, "clarity": clarity_avg}[x]
-    )
-
-    weak = min(
-        {"technical": tech_avg, "depth": depth_avg, "clarity": clarity_avg},
-        key=lambda x: {"technical": tech_avg, "depth": depth_avg, "clarity": clarity_avg}[x]
-    )
-
-    # 🔥 Suggestions logic
+def generate_summary_from_history(history):
+    """Generate summary from session history"""
+    if not history:
+        return {
+            "total": 0,
+            "avg_score": 0,
+            "breakdown": {"technical": 0, "depth": 0, "clarity": 0},
+            "strong": "N/A",
+            "weak": "N/A",
+            "suggestions": ["Complete a practice session to see your analysis"]
+        }
+    
+    total = len(history)
+    
+    # Calculate averages
+    avg_technical = sum(h["scores"].get("technical", 0) for h in history) / total
+    avg_depth = sum(h["scores"].get("depth", 0) for h in history) / total
+    avg_clarity = sum(h["scores"].get("clarity", 0) for h in history) / total
+    avg_overall = sum(h["scores"].get("overall", 0) for h in history) / total
+    
+    # Find strongest and weakest questions
+    scores_by_question = [(h["question"], h["scores"].get("overall", 0)) for h in history]
+    scores_by_question.sort(key=lambda x: x[1])
+    
+    weak_question = scores_by_question[0][0] if scores_by_question else "N/A"
+    strong_question = scores_by_question[-1][0] if scores_by_question else "N/A"
+    
+    # Truncate long questions
+    if len(weak_question) > 60:
+        weak_question = weak_question[:57] + "..."
+    if len(strong_question) > 60:
+        strong_question = strong_question[:57] + "..."
+    
+    # Generate suggestions based on performance
     suggestions = []
-
-    if depth_avg < 5:
-        suggestions.append("Explain concepts with real-world examples")
-    if clarity_avg < 5:
-        suggestions.append("Structure answers clearly (intro → body → example)")
-    if tech_avg < 5:
-        suggestions.append("Revise core concepts and definitions")
-
+    if avg_depth < 5:
+        suggestions.append("Add more depth to your answers - explain WHY and HOW, not just WHAT")
+    if avg_clarity < 5:
+        suggestions.append("Use structured answers (STAR method: Situation, Task, Action, Result)")
+    if avg_technical < 5:
+        suggestions.append("Include technical details and specific technologies you used")
+    if len(suggestions) == 0:
+        suggestions.append("Great job! Keep practicing with more difficult questions")
+    if avg_overall < 6:
+        suggestions.append("Try to provide concrete examples from your experience")
+    
     return {
-        "avg_score": round(overall_avg, 2),
         "total": total,
+        "avg_score": round(avg_overall, 1),
         "breakdown": {
-            "technical": round(tech_avg, 2),
-            "depth": round(depth_avg, 2),
-            "clarity": round(clarity_avg, 2),
+            "technical": round(avg_technical, 1),
+            "depth": round(avg_depth, 1),
+            "clarity": round(avg_clarity, 1)
         },
-        "topics": topic_summary,
-        "strong": strong,
-        "weak": weak,
+        "strong": strong_question,
+        "weak": weak_question,
         "suggestions": suggestions
     }
+
+
+def generate_summary(history):
+    """Alias for generate_summary_from_history for backward compatibility"""
+    return generate_summary_from_history(history)
+
+
+def get_summary_from_db(user_id):
+    """Get summary from database"""
+    db = SessionLocal()
+    try:
+        answers = db.query(Answer).filter(Answer.user_id == user_id).all()
+        
+        if not answers:
+            return {
+                "total": 0,
+                "avg_score": 0,
+                "breakdown": {"technical": 0, "depth": 0, "clarity": 0},
+                "strong": "N/A",
+                "weak": "N/A",
+                "suggestions": ["Complete a practice session to see your analysis"]
+            }
+        
+        history = [
+            {
+                "question": a.question,
+                "answer": a.answer,
+                "scores": {
+                    "technical": a.technical,
+                    "depth": a.depth,
+                    "clarity": a.clarity,
+                    "overall": a.overall
+                }
+            }
+            for a in answers
+        ]
+        
+        return generate_summary_from_history(history)
+        
+    except Exception as e:
+        print(f"Get summary error: {e}")
+        return {
+            "total": 0,
+            "avg_score": 0,
+            "breakdown": {"technical": 0, "depth": 0, "clarity": 0},
+            "strong": "N/A",
+            "weak": "N/A",
+            "suggestions": ["Error loading summary"]
+        }
+    finally:
+        db.close()

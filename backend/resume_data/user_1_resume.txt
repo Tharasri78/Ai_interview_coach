@@ -1,0 +1,47 @@
+THARASRI B
+ 
+SKILLS
+PROJECTS
+Health Tracker Website
+EDUCATION
+ 
+CERTIFICATIONS
+CAREER OBJECTIVE
+ 
+JavaScript, Java, Python
+B.TECH INFORMATION TECHNOLOGY
+KGiSL Institute of Technology
+2023-Current
+COIMBATORE
+HSLC|83%
+A.R.N Matric Higher Secondary School
+COIMBATORE
+Certified in Responsive Web Design – freeCodeCamp
+Certified in Git & GitHub – Coursera
+Certified in JavaScript – Udemy
+Certified in Frontend Development – Simplilearn
+Problem-solving, logical thinking, communication, teamwork
+React.js, Node.js, Express.js
+MERN-based app to track user health data with a responsive UI
+Built REST APIs and handled authentication
+Tech Stack: React.js, Node.js, Express.js, MongoDB
+Micro Blogging Platform
+Full-stack MERN application for creating and managing short posts
+Implemented CRUD operations and user authentication
+Tech Stack: React.js, Node.js, Express.js, MongoDB
+MAR 2024 
+ JUN 2022 - APR 2023
+OCT 2025 
+Git, GitHub, VS Code, Postman
+ SEP 2023 - MAY 2027
+MERNStack Developer with experience in building responsive web applications using MongoDB,
+Express.js, React.js, and Node.js. Skilled in developing REST APIs, connecting frontend with
+backend, and handling databases. Focused on building reliable, full-stack web applications using
+the MERN stack.
+Soft Skills:
+Programming Languages
+Web Development
+ +91- 8610288700|tharasribaskaran@gmail.com | Coimbatore
+ www.linkedin.com/in/tharasri/ | https://github.com/Tharasri78
+Version Control & Tools
+Technical Skills:
