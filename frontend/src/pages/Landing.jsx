@@ -13,7 +13,11 @@ import {
   FiBookOpen,
   FiMessageSquare,
   FiAward,
-  FiCheckCircle
+  FiCheckCircle,
+  FiUpload,
+  FiCode,
+  FiUserCheck,
+  FiClock
 } from "react-icons/fi";
 
 export default function Landing() {
@@ -38,57 +42,57 @@ export default function Landing() {
 
   const features = [
     {
-      icon: <FiBookOpen size={22} />,
-      title: "Skill-based questions",
-      desc: "Questions generated based on your selected topic and extracted skills."
+      icon: <FiUpload size={22} />,
+      title: "Resume-Based Questions",
+      desc: "Upload your resume and get personalized questions based on your actual experience and skills."
     },
     {
-      icon: <FiMessageSquare size={22} />,
-      title: "AI answer evaluation",
-      desc: "Your answers are scored on technical accuracy, depth, and clarity."
+      icon: <FiCpu size={22} />,
+      title: "AI-Powered Evaluation",
+      desc: "Get detailed scores on technical accuracy, depth, and clarity with actionable feedback."
     },
     {
       icon: <FiTarget size={22} />,
-      title: "Gap identification",
-      desc: "Understand exactly where your answer lacks depth or clarity."
+      title: "3-Round Interview Flow",
+      desc: "HR → Technical → Deep Dive - mirrors real interview processes at top tech companies."
     },
     {
-      icon: <FiAward size={22} />,
-      title: "Topic-focused practice",
-      desc: "Practice specific topics instead of random interview questions."
+      icon: <FiCode size={22} />,
+      title: "Coding Challenges",
+      desc: "Solve algorithmic problems with test case validation and instant feedback."
     },
     {
       icon: <FiTrendingUp size={22} />,
-      title: "Adaptive difficulty",
-      desc: "Difficulty adjusts based on your performance during the session."
+      title: "Adaptive Difficulty",
+      desc: "Questions adjust to your performance - harder when you excel, easier when you struggle."
     },
     {
       icon: <FiBarChart2 size={22} />,
-      title: "Performance tracking",
-      desc: "Track your scores and improvement across sessions."
+      title: "Performance Analytics",
+      desc: "Track strengths, weaknesses, and improvement over time with detailed summaries."
     },
   ];
 
   const steps = [
     {
       num: "01",
-      title: "Upload your resources",
-      desc: "Upload PDFs of your learning material. Prepply extracts key concepts automatically."
+      title: "Upload Your Resume",
+      desc: "Upload your PDF resume. Our AI extracts your skills, projects, and experience."
     },
     {
       num: "02",
-      title: "Choose a topic",
-      desc: "Select any topic from your materials or enter a new one to practice."
+      title: "Start Interview",
+      desc: "Begin a structured 6-question interview across HR, Technical, and Deep Dive rounds."
     },
     {
       num: "03",
-      title: "Answer questions",
-      desc: "Write your own answers — no multiple choice, just real interview practice."
+      title: "Answer Questions",
+      desc: "Write detailed answers. Get real-time feedback on quality and structure."
     },
     {
       num: "04",
-      title: "Get AI feedback",
-      desc: "Receive detailed scores and actionable insights to improve your answers."
+      title: "Review & Improve",
+      desc: "Receive scores, model answers, and personalized recommendations to level up."
     },
   ];
 
@@ -124,17 +128,17 @@ export default function Landing() {
         <div className="hero-content">
           <div className="hero-badge">
             <span className="badge-dot"></span>
-            AI-Powered Interview Coach
+            AI-Powered Interview Preparation
           </div>
           
           <h1 className="hero-title">
-            Prepare smarter.<br />
-            <span className="gradient-text">Master</span> your interview.
+            Ace your next<br />
+            <span className="gradient-text">technical interview</span>
           </h1>
           
           <p className="hero-description">
-            Practice with targeted interview questions based on your skills and topics.
-            Get instant AI feedback on every answer and track your progress over time.
+            Practice with realistic interview questions generated from your resume.
+            Get instant AI feedback, track your progress, and land your dream job.
           </p>
           
           <div className="hero-buttons">
@@ -148,26 +152,26 @@ export default function Landing() {
           
           <div className="hero-stats">
             <div className="stat-item">
-              <FiCpu className="stat-icon" />
+              <FiCheckCircle className="stat-icon" />
               <div>
-                <div className="stat-value">AI-powered</div>
-                <div className="stat-label">Smart evaluation</div>
+                <div className="stat-value">6 Questions</div>
+                <div className="stat-label">Complete interview flow</div>
               </div>
             </div>
             <div className="stat-divider"></div>
             <div className="stat-item">
               <FiZap className="stat-icon" />
               <div>
-                <div className="stat-value">Real-time</div>
-                <div className="stat-label">Instant feedback</div>
+                <div className="stat-value">Instant</div>
+                <div className="stat-label">AI feedback</div>
               </div>
             </div>
             <div className="stat-divider"></div>
             <div className="stat-item">
               <FiActivity className="stat-icon" />
               <div>
-                <div className="stat-value">Track progress</div>
-                <div className="stat-label">Performance summary</div>
+                <div className="stat-value">Track</div>
+                <div className="stat-label">Your progress</div>
               </div>
             </div>
           </div>
@@ -179,9 +183,9 @@ export default function Landing() {
         <div className="container">
           <div className="section-header fade-up">
             <div className="section-label">Why choose Prepply</div>
-            <h2 className="section-title">Built differently<br />from the ground up</h2>
+            <h2 className="section-title">Everything you need to<br />succeed in interviews</h2>
             <p className="section-subtitle">
-              Most tools guess what you need to know. Prepply knows — because it reads exactly what you give it.
+              Unlike generic platforms, Prepply adapts to YOUR resume and skill level.
             </p>
           </div>
           
@@ -202,7 +206,7 @@ export default function Landing() {
         <div className="container">
           <div className="section-header fade-up">
             <div className="section-label">Simple process</div>
-            <h2 className="section-title">Four steps to success<br />No guesswork</h2>
+            <h2 className="section-title">Get interview-ready in<br />4 simple steps</h2>
           </div>
           
           <div className="process-steps">
@@ -218,37 +222,37 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* SUMMARY FEATURE SECTION */}
+      {/* INTERVIEW STRUCTURE SECTION */}
       <section className="summary-section">
         <div className="container">
           <div className="section-header fade-up">
-            <div className="section-label">Track your growth</div>
-            <h2 className="section-title">Performance summary<br />at your fingertips</h2>
+            <div className="section-label">Interview Structure</div>
+            <h2 className="section-title">Real interview format<br />that works</h2>
             <p className="section-subtitle">
-              Get detailed insights about your strengths, weaknesses, and progress over time.
+              6 questions across 3 rounds - exactly like real technical interviews.
             </p>
           </div>
           
           <div className="summary-grid">
             <div className="summary-card fade-up">
+              <div className="summary-icon"><FiUserCheck size={32} /></div>
+              <h3>HR Round</h3>
+              <p>Behavioral questions about your projects, teamwork, and problem-solving approach.</p>
+            </div>
+            <div className="summary-card fade-up">
+              <div className="summary-icon"><FiCode size={32} /></div>
+              <h3>Technical Round</h3>
+              <p>Resume-based questions, core concepts, and coding challenges with test cases.</p>
+            </div>
+            <div className="summary-card fade-up">
+              <div className="summary-icon"><FiCpu size={32} /></div>
+              <h3>Deep Dive Round</h3>
+              <p>Follow-up questions that test your depth of understanding and reasoning.</p>
+            </div>
+            <div className="summary-card fade-up">
               <div className="summary-icon"><FiBarChart2 size={32} /></div>
-              <h3>Skill Breakdown</h3>
-              <p>See your scores across technical accuracy, depth, and clarity</p>
-            </div>
-            <div className="summary-card fade-up">
-              <div className="summary-icon"><FiTarget size={32} /></div>
-              <h3>Strong & Weak Areas</h3>
-              <p>Identify what you excel at and what needs improvement</p>
-            </div>
-            <div className="summary-card fade-up">
-              <div className="summary-icon"><FiTrendingUp size={32} /></div>
-              <h3>Topic Performance</h3>
-              <p>Track how you perform across different subjects and topics</p>
-            </div>
-            <div className="summary-card fade-up">
-              <div className="summary-icon"><FiSun size={32} /></div>
-              <h3>Personalized Tips</h3>
-              <p>Get actionable recommendations to level up your skills</p>
+              <h3>Performance Summary</h3>
+              <p>Detailed scores, strengths analysis, and personalized improvement tips.</p>
             </div>
           </div>
         </div>
@@ -258,10 +262,10 @@ export default function Landing() {
       <section className="callout">
         <div className="callout-content">
           <p className="callout-quote">
-            "Focused interview practice with real-time AI feedback and performance tracking."
+            "The questions actually matched my resume. The feedback helped me understand exactly where I need to improve."
           </p>
           <p className="callout-credit">
-            Designed for students, engineers, and anyone who prepares seriously.
+            — Interview practice that delivers results
           </p>
         </div>
       </section>
@@ -269,12 +273,12 @@ export default function Landing() {
       {/* CTA SECTION */}
       <section className="cta">
         <div className="cta-content">
-          <h2 className="cta-title">Ready to prepare properly?</h2>
+          <h2 className="cta-title">Ready to crush your interview?</h2>
           <p className="cta-description">
-            Upload your first document and get your first question in under a minute.
+            Join thousands of candidates who prepared with Prepply.
           </p>
           <button className="btn-cta" onClick={() => navigate("/auth")}>
-            Get started — it's free <FiArrowRight />
+            Start practicing — it's free <FiArrowRight />
           </button>
         </div>
       </section>

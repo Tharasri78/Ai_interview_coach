@@ -139,7 +139,7 @@ export default function Summary() {
           {!summaryLoading && (!summary || summary.total === 0) && (
             <div className="card">
               <div className="msg msg-info">
-                📊 No data available yet. Complete a practice session to see your performance summary.
+                 No data available yet. Complete a practice session to see your performance summary.
               </div>
               <button
                 className="btn btn-primary btn-full"
@@ -271,7 +271,7 @@ export default function Summary() {
 
                 {(summary.suggestions || []).length > 0 && (
                   <div className="recommendations-box">
-                    <div className="recommendations-title">📝 Recommendations</div>
+                    <div className="recommendations-title"> Recommendations</div>
                     {summary.suggestions.map((tip, index) => (
                       <div key={index} className="recommendation-item">
                         <span className="bullet">→</span> {tip}

@@ -20,8 +20,6 @@ export default function InterviewBox({ userId, question, round, index, total, on
   const [finished, setFinished] = useState(false);
   const [summary, setSummary] = useState(null);
   const [answerHints, setAnswerHints] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(120);
-  const [timerActive, setTimerActive] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
 
   // Round configuration
@@ -31,27 +29,17 @@ export default function InterviewBox({ userId, question, round, index, total, on
     3: { name: "Deep Dive", icon: <FiCpu size={16} /> }
   };
 
-  // Timer effect
+  // Reset transition state for new question
   useEffect(() => {
-    if (timerActive && !showNext && !finished && timeLeft > 0 && !transitioning) {
-      const timer = setInterval(() => {
-        setTimeLeft(prev => prev - 1);
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [timerActive, showNext, finished, timeLeft, transitioning]);
-
-  // Reset timer for new question
-  useEffect(() => {
-    setTimeLeft(120);
-    setTimerActive(true);
     setTransitioning(false);
   }, [question]);
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const getQuestionText = () => {
+    if (transitioning) return "Loading next question...";
+    if (loading) return "Generating question...";
+    if (typeof question === 'string') return question;
+    if (question?.question) return question.question;
+    return "Loading...";
   };
 
   // Real-time answer quality analysis
@@ -92,7 +80,6 @@ export default function InterviewBox({ userId, question, round, index, total, on
     if (!answer.trim()) return;
 
     setLoading(true);
-    setTimerActive(false);
 
     try {
       const res = await nextStep(userId, answer);
@@ -120,7 +107,6 @@ export default function InterviewBox({ userId, question, round, index, total, on
     setEvaluation(null);
     setAnswer("");
     setAnswerHints([]);
-    setTimerActive(true);
     
     setTimeout(() => {
       onNext(nextData);
@@ -213,17 +199,6 @@ export default function InterviewBox({ userId, question, round, index, total, on
 
   const progressPercent = ((index - 1) / total) * 100;
   const currentRoundData = roundConfig[round] || roundConfig[1];
-  const isWarning = timeLeft <= 30;
-  const isCritical = timeLeft <= 10;
-
-  // Get question text
-  const getQuestionText = () => {
-    if (transitioning) return "Loading next question...";
-    if (loading) return "Generating question...";
-    if (typeof question === 'string') return question;
-    if (question?.question) return question.question;
-    return "Loading...";
-  };
 
   return (
     <div className="card">
@@ -246,17 +221,6 @@ export default function InterviewBox({ userId, question, round, index, total, on
               Question {index} of {total}
             </span>
           </div>
-          
-          <div style={{ 
-            padding: "4px 12px",
-            background: isCritical ? "#FEF2F2" : isWarning ? "#FFFBEB" : "#F3F4F6",
-            borderRadius: 20,
-            color: isCritical ? "#DC2626" : isWarning ? "#D97706" : "#6B7080",
-            fontWeight: 600
-          }}>
-            <FiInfo size={12} style={{ marginRight: 4 }} />
-            <span style={{ fontSize: "0.8rem" }}>{formatTime(timeLeft)}</span>
-          </div>
         </div>
         
         <div style={{ height: 6, background: "#E8E9EF", borderRadius: 3, overflow: "hidden" }}>
@@ -275,7 +239,7 @@ export default function InterviewBox({ userId, question, round, index, total, on
         </div>
       </div>
 
-      {/* Question Box */}
+      {/* Question Card */}
       <div style={{ 
         background: "#F8F9FC", 
         padding: 24, 
@@ -284,7 +248,7 @@ export default function InterviewBox({ userId, question, round, index, total, on
         borderLeft: "4px solid #4F46E5"
       }}>
         <div style={{ fontSize: "0.7rem", color: "#4F46E5", marginBottom: 10, textTransform: "uppercase" }}>
-          Question {index} of {total}
+          Interview Question
         </div>
         <div style={{ fontSize: "1rem", lineHeight: 1.6, color: "#0F1117", fontWeight: 500 }}>
           {getQuestionText()}
@@ -306,7 +270,6 @@ export default function InterviewBox({ userId, question, round, index, total, on
             />
           </div>
 
-          {/* Live Hints */}
           {answerHints.length > 0 && answer.length > 0 && (
             <div style={{ marginBottom: 20 }}>
               {answerHints.map((hint, idx) => (

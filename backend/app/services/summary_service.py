@@ -2,8 +2,12 @@ from app.db.database import SessionLocal
 from app.db.models import Answer
 from datetime import datetime
 
+from app.db.database import SessionLocal
+from app.db.models import Answer
+from datetime import datetime
+
 def save_answer_to_db(user_id, question, answer, scores):
-    """Save answer to database"""
+    """Save answer to database with correct timestamp"""
     db = SessionLocal()
     try:
         answer_record = Answer(
@@ -14,11 +18,11 @@ def save_answer_to_db(user_id, question, answer, scores):
             depth=scores.get("depth", 0),
             clarity=scores.get("clarity", 0),
             overall=scores.get("overall", 0),
-            created_at=datetime.utcnow()
+            created_at=datetime.now()  # Use datetime.now() instead of datetime.utcnow()
         )
         db.add(answer_record)
         db.commit()
-        print(f"✅ DB Save - User: {user_id}, Score: {scores.get('overall', 0)}")
+        print(f"✅ Saved answer at {datetime.now()} for user {user_id}")
         return True
     except Exception as e:
         print(f"❌ DB Save error: {e}")

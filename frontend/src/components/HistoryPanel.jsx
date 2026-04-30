@@ -45,7 +45,8 @@ export default function HistoryPanel({ userId }) {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "Recent";
+    if (!dateString) return "Just now";
+    
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now - date;
@@ -53,12 +54,15 @@ export default function HistoryPanel({ userId }) {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
+    // If date is invalid, return "Just now"
+    if (isNaN(date.getTime())) return "Just now";
+    
     if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins} min ago`;
     if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
     if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
     return date.toLocaleDateString();
-  };
+};
 
   const StatsCard = () => {
     const totalQuestions = history.length;
@@ -122,7 +126,6 @@ export default function HistoryPanel({ userId }) {
     return (
       <div className="card">
         <div style={{ textAlign: "center", padding: "48px 24px" }}>
-          <div style={{ fontSize: "48px", marginBottom: "16px" }}>📋</div>
           <h3>No Interview History</h3>
           <p style={{ color: "#6B7080", marginBottom: "20px" }}>Complete a practice session to see your history here.</p>
           <button className="btn btn-primary" onClick={() => window.location.reload()}>

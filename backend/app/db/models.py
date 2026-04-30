@@ -25,6 +25,7 @@ class UserProfile(Base):
 
 
 # ---------------- ANSWERS ----------------
+
 class Answer(Base):
     __tablename__ = "answers"
 
@@ -34,12 +35,12 @@ class Answer(Base):
     question = Column(Text)
     answer = Column(Text)
 
-    technical = Column(Float)
-    depth = Column(Float)
-    clarity = Column(Float)
-    overall = Column(Float)
+    technical = Column(Float, default=0)
+    depth = Column(Float, default=0)
+    clarity = Column(Float, default=0)
+    overall = Column(Float, default=0)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
 
 
 # ---------------- INTERVIEW SESSION ----------------
