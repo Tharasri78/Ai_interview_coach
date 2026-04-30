@@ -8,8 +8,7 @@ import {
   FiCpu,
   FiAlertCircle,
   FiCheckCircle,
-  FiInfo,
-  FiBarChart2
+  FiInfo
 } from "react-icons/fi";
 
 export default function InterviewBox({ userId, question, round, index, total, onNext }) {
@@ -21,45 +20,32 @@ export default function InterviewBox({ userId, question, round, index, total, on
   const [finished, setFinished] = useState(false);
   const [summary, setSummary] = useState(null);
   const [answerHints, setAnswerHints] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(120); // 2 minutes per question
+  const [timeLeft, setTimeLeft] = useState(120);
   const [timerActive, setTimerActive] = useState(true);
+  const [transitioning, setTransitioning] = useState(false);
 
   // Round configuration
   const roundConfig = {
-    1: { 
-      name: "HR Round", 
-      icon: <FiMessageSquare size={16} />, 
-      description: "Behavioral & Cultural Fit",
-      questionsRange: "Questions 1-2"
-    },
-    2: { 
-      name: "Technical Round", 
-      icon: <FiCode size={16} />, 
-      description: "Core Concepts & Skills",
-      questionsRange: "Questions 3-4"
-    },
-    3: { 
-      name: "Deep Dive", 
-      icon: <FiCpu size={16} />, 
-      description: "System Design & Problem Solving",
-      questionsRange: "Questions 5-6"
-    }
+    1: { name: "HR Round", icon: <FiMessageSquare size={16} /> },
+    2: { name: "Technical Round", icon: <FiCode size={16} /> },
+    3: { name: "Deep Dive", icon: <FiCpu size={16} /> }
   };
 
   // Timer effect
   useEffect(() => {
-    if (timerActive && !showNext && !finished && timeLeft > 0) {
+    if (timerActive && !showNext && !finished && timeLeft > 0 && !transitioning) {
       const timer = setInterval(() => {
         setTimeLeft(prev => prev - 1);
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [timerActive, showNext, finished, timeLeft]);
+  }, [timerActive, showNext, finished, timeLeft, transitioning]);
 
   // Reset timer for new question
   useEffect(() => {
     setTimeLeft(120);
     setTimerActive(true);
+    setTransitioning(false);
   }, [question]);
 
   const formatTime = (seconds) => {
@@ -72,42 +58,28 @@ export default function InterviewBox({ userId, question, round, index, total, on
   const analyzeAnswerQuality = (text) => {
     const hints = [];
     
-    // Length analysis
     if (text.length === 0) {
       hints.push({ type: "info", message: "Start typing your answer..." });
     } else if (text.length < 50) {
-      hints.push({ type: "warning", message: "Increase depth - Add specific details and examples" });
+      hints.push({ type: "warning", message: "Add more detail - provide specific examples" });
     } else if (text.length < 150) {
-      hints.push({ type: "info", message: "Good start - Consider adding more technical depth" });
+      hints.push({ type: "info", message: "Good start - add technical depth" });
     } else if (text.length >= 150 && text.length <= 500) {
-      hints.push({ type: "success", message: "Optimal length - Well structured response" });
+      hints.push({ type: "success", message: "Good length - well structured" });
     } else {
-      hints.push({ type: "warning", message: "Consider being more concise - Focus on key points" });
+      hints.push({ type: "warning", message: "Consider being more concise" });
     }
     
-    // STAR method detection
-    const starKeywords = ["situation", "task", "action", "result", "context", "goal", "outcome", "learned", "implemented", "designed", "built", "created", "led", "managed"];
+    const starKeywords = ["situation", "task", "action", "result", "context", "goal", "outcome"];
     const found = starKeywords.filter(kw => text.toLowerCase().includes(kw));
     
     if (found.length < 3) {
-      hints.push({ type: "warning", message: "Use STAR framework: Situation, Task, Action, Result" });
-    } else if (found.length >= 3 && found.length < 5) {
-      hints.push({ type: "success", message: "Good structure - Continue using STAR method" });
+      hints.push({ type: "warning", message: "Use STAR method: Situation, Task, Action, Result" });
     } else {
-      hints.push({ type: "success", message: "Excellent structure - Clear and well-organized" });
+      hints.push({ type: "success", message: "Good structure using STAR method" });
     }
     
-    // Technical depth
-    const techKeywords = ["because", "however", "therefore", "implemented", "designed", "optimized", "architecture", "database", "api", "system", "performance", "scalability"];
-    const techFound = techKeywords.filter(kw => text.toLowerCase().includes(kw));
-    
-    if (techFound.length === 0 && text.length > 50) {
-      hints.push({ type: "warning", message: "Add technical reasoning - Explain WHY and HOW" });
-    } else if (techFound.length >= 2) {
-      hints.push({ type: "success", message: "Strong technical depth - Good analytical thinking" });
-    }
-    
-    setAnswerHints(hints);
+    setAnswerHints(hints.slice(0, 2));
   };
 
   const handleAnswerChange = (e) => {
@@ -142,82 +114,98 @@ export default function InterviewBox({ userId, question, round, index, total, on
     setLoading(false);
   };
 
+  const handleNextWithTransition = () => {
+    setTransitioning(true);
+    setShowNext(false);
+    setEvaluation(null);
+    setAnswer("");
+    setAnswerHints([]);
+    setTimerActive(true);
+    
+    setTimeout(() => {
+      onNext(nextData);
+      setTransitioning(false);
+    }, 300);
+  };
+
+  // Interview Completed Screen
   if (finished) {
-    const currentRoundData = roundConfig[round] || roundConfig[1];
     const overallScore = summary?.avg_score || 0;
-    const scoreLevel = overallScore >= 7 ? "Advanced" : overallScore >= 5 ? "Intermediate" : "Foundation";
+    const scoreLevel = overallScore >= 7 ? "Advanced" : overallScore >= 5 ? "Intermediate" : "Beginner";
+    const passStatus = overallScore >= 6 ? "Passed" : "Needs Improvement";
     
     return (
-      <div className="card">
-        <div className="card-header">
-          <div className="card-title-group">
-            <div className="card-icon green">
-              <FiCheck size={20} />
-            </div>
-            <div>
-              <div className="card-title">Assessment Complete</div>
-              <div className="card-sub">Performance Summary Report</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="overall-score-wrapper" style={{ marginTop: 20 }}>
-          <div className="score-ring" style={{
-            background: `conic-gradient(#4F46E5 ${(overallScore / 10) * 360}deg, #E8E9EF 0deg)`
+      <div className="card" style={{ textAlign: "center" }}>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ 
+            width: 80, 
+            height: 80, 
+            borderRadius: "50%", 
+            background: overallScore >= 6 ? "#ECFDF5" : "#FEF2F2",
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center",
+            margin: "0 auto 16px"
           }}>
-            <div className="score-ring-inner">
-              <span className="score-number">{overallScore.toFixed(1)}</span>
-              <span className="score-total">/10</span>
-            </div>
+            {overallScore >= 6 ? <FiCheckCircle size={40} color="#059669" /> : <FiAlertCircle size={40} color="#DC2626" />}
           </div>
-          <div className="overall-stats">
-            <h2 className="overall-title">Overall Performance</h2>
-            <p className="overall-attempts">{summary?.total || 0} questions answered</p>
-            <div className="overall-level">{scoreLevel}</div>
+          <h2>Interview Completed</h2>
+          <p style={{ color: "#6B7080" }}>You've completed all 6 questions</p>
+        </div>
+
+        <div style={{ 
+          display: "flex", 
+          justifyContent: "center", 
+          gap: 40, 
+          marginBottom: 24,
+          padding: 20,
+          background: "#F8F9FC",
+          borderRadius: 12
+        }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 32, fontWeight: "bold", color: "#4F46E5" }}>{overallScore.toFixed(1)}</div>
+            <div style={{ fontSize: 12, color: "#6B7080" }}>Overall Score</div>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 32, fontWeight: "bold", color: overallScore >= 6 ? "#059669" : "#D97706" }}>{passStatus}</div>
+            <div style={{ fontSize: 12, color: "#6B7080" }}>Status</div>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 32, fontWeight: "bold", color: "#4F46E5" }}>{scoreLevel}</div>
+            <div style={{ fontSize: 12, color: "#6B7080" }}>Level</div>
           </div>
         </div>
 
-        <div className="areas-grid" style={{ marginTop: 24, marginBottom: 24 }}>
-          <div className="area-box strong">
-            <div className="area-icon">
-              <FiCheckCircle size={18} />
+        <div style={{ marginBottom: 24, textAlign: "left" }}>
+          <h3 style={{ marginBottom: 12 }}>Performance Summary</h3>
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+            <div style={{ flex: 1, padding: 12, background: "#EEF2FF", borderRadius: 8 }}>
+              <div style={{ fontSize: 12, color: "#4F46E5" }}>Strengths</div>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{summary?.strong?.substring(0, 60) || "Good communication"}...</div>
             </div>
-            <div className="area-info">
-              <div className="area-label">Strength Area</div>
-              <div className="area-name">{summary?.strong?.substring(0, 60)}...</div>
-              <div className="area-message">Continue building on this competency</div>
-            </div>
-          </div>
-
-          <div className="area-box weak">
-            <div className="area-icon">
-              <FiAlertCircle size={18} />
-            </div>
-            <div className="area-info">
-              <div className="area-label">Development Area</div>
-              <div className="area-name">{summary?.weak?.substring(0, 60)}...</div>
-              <div className="area-message">Focus practice on this topic</div>
+            <div style={{ flex: 1, padding: 12, background: "#FFFBEB", borderRadius: 8 }}>
+              <div style={{ fontSize: 12, color: "#D97706" }}>Areas to Improve</div>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{summary?.weak?.substring(0, 60) || "Technical depth"}...</div>
             </div>
           </div>
         </div>
 
         {(summary?.suggestions || []).length > 0 && (
-          <div className="recommendations-box">
-            <div className="recommendations-title">Development Recommendations</div>
-            {summary.suggestions.map((tip, idx) => (
-              <div key={idx} className="recommendation-item">
-                <span className="bullet">→</span> {tip}
-              </div>
-            ))}
+          <div style={{ marginBottom: 24, textAlign: "left", padding: 16, background: "#F8F9FC", borderRadius: 8 }}>
+            <h4 style={{ marginBottom: 8 }}>Recommendations</h4>
+            <ul style={{ margin: 0, paddingLeft: 20 }}>
+              {summary.suggestions.slice(0, 3).map((tip, idx) => (
+                <li key={idx} style={{ marginBottom: 6 }}>{tip}</li>
+              ))}
+            </ul>
           </div>
         )}
 
         <button 
           className="btn btn-primary btn-full" 
-          style={{ marginTop: 24 }}
           onClick={() => window.location.reload()}
         >
-          Start New Session
+          Start New Interview
         </button>
       </div>
     );
@@ -228,9 +216,18 @@ export default function InterviewBox({ userId, question, round, index, total, on
   const isWarning = timeLeft <= 30;
   const isCritical = timeLeft <= 10;
 
+  // Get question text
+  const getQuestionText = () => {
+    if (transitioning) return "Loading next question...";
+    if (loading) return "Generating question...";
+    if (typeof question === 'string') return question;
+    if (question?.question) return question.question;
+    return "Loading...";
+  };
+
   return (
     <div className="card">
-      {/* Progress Header */}
+      {/* Progress Bar */}
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -240,8 +237,7 @@ export default function InterviewBox({ userId, question, round, index, total, on
               gap: 6,
               padding: "4px 12px",
               background: "#EEF2FF",
-              borderRadius: 20,
-              color: "#4F46E5"
+              borderRadius: 20
             }}>
               {currentRoundData.icon}
               <span style={{ fontSize: "0.8rem", fontWeight: 600 }}>{currentRoundData.name}</span>
@@ -251,217 +247,120 @@ export default function InterviewBox({ userId, question, round, index, total, on
             </span>
           </div>
           
-          {/* Timer */}
           <div style={{ 
-            display: "flex", 
-            alignItems: "center", 
-            gap: 6,
             padding: "4px 12px",
             background: isCritical ? "#FEF2F2" : isWarning ? "#FFFBEB" : "#F3F4F6",
             borderRadius: 20,
             color: isCritical ? "#DC2626" : isWarning ? "#D97706" : "#6B7080",
             fontWeight: 600
           }}>
-            <FiInfo size={14} />
+            <FiInfo size={12} style={{ marginRight: 4 }} />
             <span style={{ fontSize: "0.8rem" }}>{formatTime(timeLeft)}</span>
           </div>
         </div>
         
-        {/* Progress Bar */}
-        <div style={{ 
-          height: 6, 
-          background: "#E8E9EF", 
-          borderRadius: 3, 
-          overflow: "hidden" 
-        }}>
+        <div style={{ height: 6, background: "#E8E9EF", borderRadius: 3, overflow: "hidden" }}>
           <div style={{ 
             width: `${progressPercent}%`, 
             height: "100%", 
             background: "linear-gradient(90deg, #4F46E5, #7C3AED)",
-            borderRadius: 3,
             transition: "width 0.3s ease"
           }} />
         </div>
         
-        {/* Round Indicators */}
-        <div style={{ 
-          display: "flex", 
-          justifyContent: "space-between", 
-          marginTop: 12,
-          fontSize: "0.7rem",
-          color: "#6B7080"
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <FiMessageSquare size={12} />
-            <span>HR Round</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <FiCode size={12} />
-            <span>Technical</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <FiCpu size={12} />
-            <span>Deep Dive</span>
-          </div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: "0.7rem", color: "#6B7080" }}>
+          <span>HR Round</span>
+          <span>Technical Round</span>
+          <span>Deep Dive</span>
         </div>
       </div>
 
-      {/* Question Card */}
-      <div className="question-box" style={{ 
+      {/* Question Box */}
+      <div style={{ 
         background: "#F8F9FC", 
         padding: 24, 
         borderRadius: 12,
         marginBottom: 24,
         borderLeft: "4px solid #4F46E5"
       }}>
-        <div style={{ 
-          fontSize: "0.7rem", 
-          color: "#4F46E5", 
-          marginBottom: 10,
-          textTransform: "uppercase",
-          letterSpacing: "1px",
-          fontWeight: 600
-        }}>
-          Interview Question
+        <div style={{ fontSize: "0.7rem", color: "#4F46E5", marginBottom: 10, textTransform: "uppercase" }}>
+          Question {index} of {total}
         </div>
-        <div className="question-text" style={{ 
-          fontSize: "1rem", 
-          lineHeight: 1.6, 
-          color: "#0F1117",
-          fontWeight: 500
-        }}>
-          {question}
+        <div style={{ fontSize: "1rem", lineHeight: 1.6, color: "#0F1117", fontWeight: 500 }}>
+          {getQuestionText()}
         </div>
       </div>
 
       {/* Answer Section */}
-      <div style={{ marginBottom: 20 }}>
-        <label className="field-label">Your Response</label>
-        <textarea
-          className="textarea-input"
-          value={answer}
-          onChange={handleAnswerChange}
-          disabled={showNext}
-          placeholder="Structure your answer using the STAR method: Situation, Task, Action, Result..."
-          rows={6}
-          style={{ fontSize: "0.9rem", lineHeight: 1.6 }}
-        />
-      </div>
-
-      {/* Live Answer Quality Analysis */}
-      {answerHints.length > 0 && !showNext && answer.length > 0 && (
-        <div style={{ marginBottom: 20 }}>
-          {answerHints.map((hint, idx) => (
-            <div key={idx} style={{ 
-              padding: "8px 12px", 
-              marginBottom: 8, 
-              borderRadius: 8,
-              background: hint.type === "success" ? "#ECFDF5" : hint.type === "warning" ? "#FFFBEB" : "#EEF2FF",
-              borderLeft: `3px solid ${hint.type === "success" ? "#059669" : hint.type === "warning" ? "#D97706" : "#4F46E5"}`,
-              fontSize: "0.8rem",
-              display: "flex",
-              alignItems: "center",
-              gap: 8
-            }}>
-              {hint.type === "success" && <FiCheckCircle size={14} color="#059669" />}
-              {hint.type === "warning" && <FiAlertCircle size={14} color="#D97706" />}
-              {hint.type === "info" && <FiInfo size={14} color="#4F46E5" />}
-              <span style={{ color: hint.type === "success" ? "#059669" : hint.type === "warning" ? "#92400E" : "#1E40AF" }}>
-                {hint.message}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Submit Button */}
       {!showNext && (
-        <button 
-          className="btn btn-primary btn-full" 
-          onClick={handleSubmit} 
-          disabled={loading || !answer.trim()}
-          style={{ 
-            marginTop: 8,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8
-          }}
-        >
-          {loading ? "Evaluating Response..." : "Submit Response"}
-          {!loading && <FiArrowRight size={16} />}
-        </button>
+        <>
+          <div style={{ marginBottom: 20 }}>
+            <label className="field-label">Your Answer</label>
+            <textarea
+              className="textarea-input"
+              value={answer}
+              onChange={handleAnswerChange}
+              placeholder="Type your answer here. Use the STAR method for best results."
+              rows={6}
+              style={{ fontSize: "0.9rem", lineHeight: 1.6 }}
+            />
+          </div>
+
+          {/* Live Hints */}
+          {answerHints.length > 0 && answer.length > 0 && (
+            <div style={{ marginBottom: 20 }}>
+              {answerHints.map((hint, idx) => (
+                <div key={idx} style={{ 
+                  padding: "6px 12px", 
+                  marginBottom: 6, 
+                  borderRadius: 6,
+                  background: hint.type === "success" ? "#ECFDF5" : "#FFFBEB",
+                  borderLeft: `3px solid ${hint.type === "success" ? "#059669" : "#D97706"}`,
+                  fontSize: "0.75rem"
+                }}>
+                  {hint.message}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button 
+            className="btn btn-primary btn-full" 
+            onClick={handleSubmit} 
+            disabled={loading || !answer.trim()}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+          >
+            {loading ? "Evaluating..." : "Submit Answer"}
+            {!loading && <FiArrowRight size={16} />}
+          </button>
+        </>
       )}
 
       {/* Evaluation Feedback */}
       {evaluation && (
-        <div style={{ marginTop: 24 }}>
-          <div style={{ 
-            padding: 20, 
-            background: "#F8F9FC", 
-            borderRadius: 12,
-            border: "1px solid #E8E9EF"
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-              <div style={{ 
-                width: 70, 
-                height: 70, 
-                borderRadius: "50%", 
-                background: `conic-gradient(#4F46E5 ${evaluation.scores.overall * 36}deg, #E8E9EF 0deg)`,
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center" 
-              }}>
-                <div style={{ 
-                  width: 56, 
-                  height: 56, 
-                  borderRadius: "50%", 
-                  background: "white", 
-                  display: "flex", 
-                  flexDirection: "column",
-                  alignItems: "center", 
-                  justifyContent: "center",
-                  fontWeight: "bold"
-                }}>
-                  <span style={{ fontSize: "1.2rem" }}>{evaluation.scores.overall}</span>
-                  <span style={{ fontSize: "0.6rem", color: "#6B7080" }}>/10</span>
-                </div>
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                  <span style={{ fontSize: "0.8rem", color: "#6B7080" }}>Technical</span>
-                  <span style={{ fontWeight: 600 }}>{evaluation.scores.technical}/10</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                  <span style={{ fontSize: "0.8rem", color: "#6B7080" }}>Depth</span>
-                  <span style={{ fontWeight: 600 }}>{evaluation.scores.depth}/10</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: "0.8rem", color: "#6B7080" }}>Clarity</span>
-                  <span style={{ fontWeight: 600 }}>{evaluation.scores.clarity}/10</span>
-                </div>
-              </div>
+        <div style={{ marginTop: 24, padding: 20, background: "#F8F9FC", borderRadius: 12 }}>
+          <div style={{ display: "flex", gap: 16, marginBottom: 16, flexWrap: "wrap" }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 24, fontWeight: "bold", color: "#4F46E5" }}>{evaluation.scores?.overall || 0}</div>
+              <div style={{ fontSize: 11, color: "#6B7080" }}>Overall</div>
             </div>
-            
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#DC2626", marginBottom: 6 }}>Issues Identified</div>
-              <p style={{ fontSize: "0.85rem", color: "#0F1117" }}>{evaluation.feedback.issues}</p>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 18, fontWeight: "bold" }}>{evaluation.scores?.technical || 0}</div>
+              <div style={{ fontSize: 11, color: "#6B7080" }}>Technical</div>
             </div>
-            
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#D97706", marginBottom: 6 }}>Missing Elements</div>
-              <p style={{ fontSize: "0.85rem", color: "#0F1117" }}>{evaluation.feedback.missing}</p>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 18, fontWeight: "bold" }}>{evaluation.scores?.depth || 0}</div>
+              <div style={{ fontSize: 11, color: "#6B7080" }}>Depth</div>
             </div>
-            
-            <div style={{ 
-              padding: 12, 
-              background: "#EEF2FF", 
-              borderRadius: 8,
-              marginBottom: 16
-            }}>
-              <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#4F46E5", marginBottom: 6 }}>Model Response</div>
-              <p style={{ fontSize: "0.85rem", color: "#0F1117", lineHeight: 1.5 }}>{evaluation.feedback.improved_answer}</p>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 18, fontWeight: "bold" }}>{evaluation.scores?.clarity || 0}</div>
+              <div style={{ fontSize: 11, color: "#6B7080" }}>Clarity</div>
             </div>
+          </div>
+          
+          <div style={{ marginBottom: 12, padding: 12, background: "#EEF2FF", borderRadius: 8 }}>
+            <strong>Feedback:</strong>
+            <p style={{ margin: "8px 0 0", fontSize: "0.85rem" }}>{evaluation.feedback?.improved_answer || "Good attempt!"}</p>
           </div>
         </div>
       )}
@@ -470,24 +369,10 @@ export default function InterviewBox({ userId, question, round, index, total, on
       {showNext && (
         <button 
           className="btn btn-primary btn-full" 
-          onClick={() => {
-            onNext(nextData);
-            setAnswer("");
-            setShowNext(false);
-            setEvaluation(null);
-            setAnswerHints([]);
-            setTimerActive(true);
-          }}
-          style={{ 
-            marginTop: 20,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8
-          }}
+          onClick={handleNextWithTransition}
+          style={{ marginTop: 20 }}
         >
-          Continue to Next Question
-          <FiArrowRight size={16} />
+          Next Question →
         </button>
       )}
     </div>

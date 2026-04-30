@@ -6,12 +6,12 @@
   "Scala",
   "R",
   "React",
+  "HTML",
+  "CSS",
   "Node.js",
   "Express",
-  "FastAPI",
+  "Flask",
   "Gin",
   "MongoDB",
-  "Azure",
-  "AI",
-  "REST API"
+  "MySQL"
 ]

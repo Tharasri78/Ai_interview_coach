@@ -1,4 +1,3 @@
-# app/services/summary_service.py
 from app.db.database import SessionLocal
 from app.db.models import Answer
 from datetime import datetime
@@ -19,14 +18,14 @@ def save_answer_to_db(user_id, question, answer, scores):
         )
         db.add(answer_record)
         db.commit()
+        print(f"✅ DB Save - User: {user_id}, Score: {scores.get('overall', 0)}")
         return True
     except Exception as e:
-        print(f"Save answer error: {e}")
+        print(f"❌ DB Save error: {e}")
         db.rollback()
         return False
     finally:
         db.close()
-
 
 def generate_summary_from_history(history):
     """Generate summary from session history"""
@@ -42,37 +41,33 @@ def generate_summary_from_history(history):
     
     total = len(history)
     
-    # Calculate averages
     avg_technical = sum(h["scores"].get("technical", 0) for h in history) / total
     avg_depth = sum(h["scores"].get("depth", 0) for h in history) / total
     avg_clarity = sum(h["scores"].get("clarity", 0) for h in history) / total
     avg_overall = sum(h["scores"].get("overall", 0) for h in history) / total
     
-    # Find strongest and weakest questions
     scores_by_question = [(h["question"], h["scores"].get("overall", 0)) for h in history]
     scores_by_question.sort(key=lambda x: x[1])
     
     weak_question = scores_by_question[0][0] if scores_by_question else "N/A"
     strong_question = scores_by_question[-1][0] if scores_by_question else "N/A"
     
-    # Truncate long questions
     if len(weak_question) > 60:
         weak_question = weak_question[:57] + "..."
     if len(strong_question) > 60:
         strong_question = strong_question[:57] + "..."
     
-    # Generate suggestions based on performance
     suggestions = []
     if avg_depth < 5:
-        suggestions.append("Add more depth to your answers - explain WHY and HOW, not just WHAT")
+        suggestions.append("Add more depth - explain WHY and HOW")
     if avg_clarity < 5:
-        suggestions.append("Use structured answers (STAR method: Situation, Task, Action, Result)")
+        suggestions.append("Use STAR method: Situation, Task, Action, Result")
     if avg_technical < 5:
-        suggestions.append("Include technical details and specific technologies you used")
+        suggestions.append("Include technical details and specific technologies")
     if len(suggestions) == 0:
-        suggestions.append("Great job! Keep practicing with more difficult questions")
+        suggestions.append("Great job! Keep practicing with harder questions")
     if avg_overall < 6:
-        suggestions.append("Try to provide concrete examples from your experience")
+        suggestions.append("Provide concrete examples from your experience")
     
     return {
         "total": total,
@@ -87,14 +82,10 @@ def generate_summary_from_history(history):
         "suggestions": suggestions
     }
 
-
 def generate_summary(history):
-    """Alias for generate_summary_from_history for backward compatibility"""
     return generate_summary_from_history(history)
 
-
 def get_summary_from_db(user_id):
-    """Get summary from database"""
     db = SessionLocal()
     try:
         answers = db.query(Answer).filter(Answer.user_id == user_id).all()
@@ -124,7 +115,6 @@ def get_summary_from_db(user_id):
         ]
         
         return generate_summary_from_history(history)
-        
     except Exception as e:
         print(f"Get summary error: {e}")
         return {

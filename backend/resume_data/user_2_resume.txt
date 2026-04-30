@@ -1,0 +1,83 @@
+Pooja K
+ +91 9384255639
+# poojakanagaraj06@gmail.com
+ï linkedin
+§ github
+Ð leetcode.com
+Education
+KGiSL Institute of Technology
+Aug 2023 – May 2027
+Bachelor of Technology in Information Technology – CGPA: 8.76/10
+Coimbatore, Tamil Nadu
+Sri Visweswara Vidhyalaya Matric Hr. Sec School
+2023
+Higher Secondary Certificate (HSC) – 91.1%
+Technical Skills
+Languages: Python, JavaScript, Java, SQL, HTML5, CSS3
+Frontend: React.js, HTML5, CSS3, Responsive Design
+Backend: Node.js, Express.js, REST APIs, JWT Authentication
+Databases: MongoDB, MySQL, Firebase Realtime Database
+DevOps & Cloud: Docker, GitHub Actions (CI/CD), AWS (EC2, S3), GCP (Firebase, Compute Engine)
+Tools & Technologies: Git/GitHub, Linux, Tesseract OCR, OpenAI API, Web Speech API
+Open Source Contributions & Achievements
+GirlScript Summer of Code (GSSoC) 2024 | Open Source Contributor
+2024
+• Merged [5] pull requests across [4] repositories focusing on [Full Stack Webdevelopment]
+• Contributed to [Wallgods,Codebook,Codeteria,Retro]: [Bug Fixes,Adding Sharing Features]
+Winter of Code (WoC) 2025 | Open Source Contributor
+2025
+• Contributed [1] PRs to [Wordwise] with focus on [Adding sharing Feature]
+Smart India Hackathon 2024 | National Finalist
+2024
+• Selected among top teams nationwide from 50,000+ participants
+• [POSTSEVA-MEASURING GAP BETWEEN POSTAL SERVICES
+AI Hackathon – Karpagam Academy of Higher Education | 2nd Place
+2024
+• Secured 2nd position among 200+ teams for [Smartuzhavan-AI powered smart farming partner]
+Projects
+Taskmate – AI Task Management System | MERN, Docker, GitHub Actions, AWS
+2024
+• Developed intelligent task management platform with AI-driven prioritization using API for smart deadline
+prediction and automated task categorization
+• Deployed production application on AWS EC2 with automated CI/CD pipeline using GitHub Actions, achieving
+zero-downtime deployments and 99.5% uptime
+• Containerized full-stack application using Docker, reducing deployment time by 60% and ensuring environment
+consistency across development and production stages
+• Implemented secure JWT authentication, voice/text input using Web Speech API, real-time notifications via
+WebSockets, and comprehensive progress tracking dashboard
+• § GitHub |  Live Demo
+SmartUzhavan – AI Farming Assistant | React, Node.js, Firebase, GCP, Machine Learning
+2024
+• Engineered AI-powered agricultural platform serving with crop disease detection achieving 90%+ accuracy
+• Integrated real-time weather alerts via WEATHER MODEL, market price analytics, and government scheme
+notifications to improve farmer decision-making by 40%
+• Deployed scalable backend on GCP with Firebase Realtime Database, optimized to handle 50+ concurrent user
+• Implemented multilingual voice support (Tamil, Hindi, English) for enhanced accessibility among non-literate farmers
+• § GitHub |  Live Demo
+Expense Tracker | MERN Stack, Chart.js, REST API
+2024
+• Built full-stack expense management platform with secure CRUD operations serving with role-based access control
+• Implemented intelligent expense categorization using pattern recognition algorithms, validation rules, and budget
+tracking with customizable threshold alerts
+• Created interactive data visualizations using Chart.js for monthly spending analysis, category-wise breakdown, trend
+forecasting, and financial insights dashboard
+• Designed responsive UI with real-time updates using MongoDB change streams and optimistic UI patterns for seamless
+user experience
+• § GitHub |  Live Demo
+Image-to-Text Converter | Python, Tesseract OCR, Flask, OpenCV
+2023
+• Developed OCR web application extracting text from images with 92% accuracy across multiple formats (JPG, PNG,
+PDF)
+• Enabled multi-format export (TXT, PDF, DOCX) with optimized preprocessing pipeline using OpenCV for image
+enhancement, noise reduction, and binarization
+• Deployed responsive Flask frontend with real-time preview functionality and batch processing capabilities for handling
+multiple documents simultaneously
+• § GitHub
+Cloud & DevOps Certifications
+Google Cloud Arcade 2025:
+Skill Badges earned across Cloud Infrastructure, Kubernetes Engine, Cloud Functions,
+and Data Engineering tracks
+Verify Badges
+AWS Practical Experience: Hands-on deployment of production applications using EC2, S3, IAM, and CI/CD
+automation
+MongoDB University: MongoDB for Students – NoSQL database fundamentals and aggregation pipeline

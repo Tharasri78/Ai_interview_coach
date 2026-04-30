@@ -1,47 +1,67 @@
-THARASRI B
- 
-SKILLS
-PROJECTS
-Health Tracker Website
+Tharasri B
+Backend Developer (AI/ML)
++91-8610288700
+tharusree7@gmail.com
+LinkedIn
+GitHub
+Coimbatore, India
+PROFESSIONAL SUMMARY
+AI Backend Developer focused on building LLM-powered applications using FastAPI, Node.js, and REST APIs.
+Experienced in designing scalable backend systems, integrating AI/LLM workflows, and working with technologies
+like LangChain and vector databases. Focused on clean API design, efficient data handling, and solving real-world
+problems.
 EDUCATION
- 
-CERTIFICATIONS
-CAREER OBJECTIVE
- 
-JavaScript, Java, Python
-B.TECH INFORMATION TECHNOLOGY
+|
 KGiSL Institute of Technology
-2023-Current
-COIMBATORE
-HSLC|83%
-A.R.N Matric Higher Secondary School
-COIMBATORE
-Certified in Responsive Web Design – freeCodeCamp
-Certified in Git & GitHub – Coursera
-Certified in JavaScript – Udemy
-Certified in Frontend Development – Simplilearn
-Problem-solving, logical thinking, communication, teamwork
-React.js, Node.js, Express.js
-MERN-based app to track user health data with a responsive UI
-Built REST APIs and handled authentication
-Tech Stack: React.js, Node.js, Express.js, MongoDB
-Micro Blogging Platform
-Full-stack MERN application for creating and managing short posts
-Implemented CRUD operations and user authentication
-Tech Stack: React.js, Node.js, Express.js, MongoDB
-MAR 2024 
- JUN 2022 - APR 2023
-OCT 2025 
-Git, GitHub, VS Code, Postman
- SEP 2023 - MAY 2027
-MERNStack Developer with experience in building responsive web applications using MongoDB,
-Express.js, React.js, and Node.js. Skilled in developing REST APIs, connecting frontend with
-backend, and handling databases. Focused on building reliable, full-stack web applications using
-the MERN stack.
-Soft Skills:
-Programming Languages
-Web Development
- +91- 8610288700|tharasribaskaran@gmail.com | Coimbatore
- www.linkedin.com/in/tharasri/ | https://github.com/Tharasri78
-Version Control & Tools
-Technical Skills:
+Coimbatore
+B.Tech INFORMATION TECHNOLOGY
+Oct 2023 - Present
+CGPA : 8.4/10
+|
+A.R.N Matric.hr.sec.school
+Coimbatore
+Higher Secondary Education
+Jun 2022 - Apr 2023
+CGPA : 83%
+PROJECTS
+AI Prescription Reader
+Mar 2026
+Built an AI-powered backend system to extract structured medicine data from handwritten prescriptions using LLM
+Designed microservice architecture integrating Node.js backend with a FastAPI-based AI service
+Developed REST APIs for image processing, authentication, data storage, and user-based access control (JWT)
+Implemented data cleaning and normalization to handle inconsistent and noisy AI outputs
+Integrated MongoDB for managing user data and prescription history
+Tech Stack : React, Node.js, FastAPI, MongoDB, Gemini API
+AI Interview Coach (RAG System)
+Apr 2026
+Developed a RAG-based backend using LangChain and FAISS vector store for context-aware question generation
+Built scalable FastAPI APIs for document processing, embeddings, and LLM-based responses
+Designed an end-to-end RAG pipeline for document-based question answering using embeddings, vector search,
+and LLMs
+Implemented AI-based answer evaluation with automated scoring and contextual feedback
+Integrated frontend with backend APIs for seamless AI-driven user interaction
+Tech Stack : Python, FastAPI, LangChain, FAISS, React, Groq API
+SKILLS
+Programming Languages :
+Python, JavaScript
+Frameworks & Libraries :
+FastAPI, Express, React, LangChain
+AI / ML :
+RAG, FAISS, LLM APIs
+Databases :
+MongoDB
+Tools :
+Git, Postman, GitHub
+CERTIFICATIONS
+Get Started with AI Agent Development on Azure
+Microsoft
+Jun 2025
+PCAP: Programming Essentials in Python
+OpenEDG Python Institute (Cisco Networking Academy)
+Aug 2023
+MongoDB Basics for Students
+MongoDB
+Jul 2025
+GenAI Job Simulation
+BCG (Forage)
+Jul 2025

@@ -1,25 +1,18 @@
 import { useState, useEffect } from "react";
 import { getHistory } from "../api/apiService";
 import { 
-  FiClock, 
   FiChevronRight, 
   FiChevronDown,
-  FiStar,
-  FiTrendingUp,
-  FiTrendingDown,
   FiCalendar,
   FiMessageSquare,
-  FiCheckCircle,
-  FiAlertCircle,
-  FiBarChart2
+  FiHelpCircle
 } from "react-icons/fi";
 
 export default function HistoryPanel({ userId }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
-  const [filter, setFilter] = useState("all"); // all, strong, weak
-  const [sortBy, setSortBy] = useState("date"); // date, score
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     fetchHistory();
@@ -29,40 +22,30 @@ export default function HistoryPanel({ userId }) {
     setLoading(true);
     try {
       const res = await getHistory(userId);
+      console.log("History data:", res.data);
       setHistory(res.data || []);
     } catch (err) {
       console.error("History error:", err);
+      setHistory([]);
     }
     setLoading(false);
   };
 
-  // Filter and sort history
-  const filteredHistory = history
-    .filter(item => {
-      if (filter === "strong") return item.score >= 7;
-      if (filter === "weak") return item.score < 5;
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === "score") return b.score - a.score;
-      return new Date(b.created_at) - new Date(a.created_at);
-    });
+  const filteredHistory = history.filter(item => {
+    if (filter === "strong") return item.score >= 7;
+    if (filter === "weak") return item.score < 5;
+    return true;
+  });
 
   const getScoreColor = (score) => {
-    if (score >= 8) return { bg: "#ECFDF5", text: "#059669", border: "#A7F3D0" };
-    if (score >= 6) return { bg: "#EEF2FF", text: "#4F46E5", border: "#C7D2FE" };
-    if (score >= 4) return { bg: "#FFFBEB", text: "#D97706", border: "#FDE68A" };
-    return { bg: "#FEF2F2", text: "#DC2626", border: "#FECACA" };
-  };
-
-  const getScoreLabel = (score) => {
-    if (score >= 8) return "Excellent";
-    if (score >= 6) return "Good";
-    if (score >= 4) return "Average";
-    return "Needs Work";
+    if (score >= 8) return { bg: "#ECFDF5", text: "#059669", label: "Excellent" };
+    if (score >= 6) return { bg: "#EEF2FF", text: "#4F46E5", label: "Good" };
+    if (score >= 4) return { bg: "#FFFBEB", text: "#D97706", label: "Average" };
+    return { bg: "#FEF2F2", text: "#DC2626", label: "Needs Work" };
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return "Recent";
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now - date;
@@ -84,31 +67,43 @@ export default function HistoryPanel({ userId }) {
       : 0;
     const strongCount = history.filter(h => h.score >= 7).length;
     const weakCount = history.filter(h => h.score < 5).length;
-    const improvement = history.length >= 2 
-      ? (history[0]?.score - history[history.length - 1]?.score).toFixed(1)
-      : 0;
 
     return (
-      <div className="history-stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon blue"><FiBarChart2 size={20} /></div>
-          <div className="stat-value">{totalQuestions}</div>
-          <div className="stat-label">Total Questions</div>
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(3, 1fr)", 
+        gap: "16px", 
+        marginBottom: "24px" 
+      }}>
+        <div style={{ 
+          background: "white", 
+          padding: "16px", 
+          borderRadius: "12px", 
+          textAlign: "center",
+          border: "1px solid #E8E9EF"
+        }}>
+          <div style={{ fontSize: "24px", fontWeight: "bold", color: "#4F46E5" }}>{totalQuestions}</div>
+          <div style={{ fontSize: "12px", color: "#6B7080" }}>Total Questions</div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon purple"><FiStar size={20} /></div>
-          <div className="stat-value">{avgScore}/10</div>
-          <div className="stat-label">Average Score</div>
+        <div style={{ 
+          background: "white", 
+          padding: "16px", 
+          borderRadius: "12px", 
+          textAlign: "center",
+          border: "1px solid #E8E9EF"
+        }}>
+          <div style={{ fontSize: "24px", fontWeight: "bold", color: "#059669" }}>{avgScore}</div>
+          <div style={{ fontSize: "12px", color: "#6B7080" }}>Average Score</div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon green"><FiTrendingUp size={20} /></div>
-          <div className="stat-value">{strongCount}</div>
-          <div className="stat-label">Strong Answers</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon red"><FiTrendingDown size={20} /></div>
-          <div className="stat-value">{weakCount}</div>
-          <div className="stat-label">Needs Practice</div>
+        <div style={{ 
+          background: "white", 
+          padding: "16px", 
+          borderRadius: "12px", 
+          textAlign: "center",
+          border: "1px solid #E8E9EF"
+        }}>
+          <div style={{ fontSize: "24px", fontWeight: "bold", color: "#4F46E5" }}>{strongCount}/{weakCount}</div>
+          <div style={{ fontSize: "12px", color: "#6B7080" }}>Strong/Weak</div>
         </div>
       </div>
     );
@@ -126,10 +121,10 @@ export default function HistoryPanel({ userId }) {
   if (history.length === 0) {
     return (
       <div className="card">
-        <div className="empty-state">
-          <div className="empty-icon"><FiClock size={48} /></div>
+        <div style={{ textAlign: "center", padding: "48px 24px" }}>
+          <div style={{ fontSize: "48px", marginBottom: "16px" }}>📋</div>
           <h3>No Interview History</h3>
-          <p>Complete a practice session to see your performance history here.</p>
+          <p style={{ color: "#6B7080", marginBottom: "20px" }}>Complete a practice session to see your history here.</p>
           <button className="btn btn-primary" onClick={() => window.location.reload()}>
             Start Practice
           </button>
@@ -139,50 +134,57 @@ export default function HistoryPanel({ userId }) {
   }
 
   return (
-    <div className="history-container">
-      {/* Stats Summary */}
+    <div>
       <StatsCard />
 
-      {/* Filter Bar */}
-      <div className="history-filter-bar">
-        <div className="filter-group">
-          <button 
-            className={`filter-btn ${filter === "all" ? "active" : ""}`}
-            onClick={() => setFilter("all")}
-          >
-            All Questions
-          </button>
-          <button 
-            className={`filter-btn ${filter === "strong" ? "active" : ""}`}
-            onClick={() => setFilter("strong")}
-          >
-            Strong (≥7)
-          </button>
-          <button 
-            className={`filter-btn ${filter === "weak" ? "active" : ""}`}
-            onClick={() => setFilter("weak")}
-          >
-            Weak (&lt;5)
-          </button>
-        </div>
-        <div className="sort-group">
-          <button 
-            className={`sort-btn ${sortBy === "date" ? "active" : ""}`}
-            onClick={() => setSortBy("date")}
-          >
-            Latest First
-          </button>
-          <button 
-            className={`sort-btn ${sortBy === "score" ? "active" : ""}`}
-            onClick={() => setSortBy("score")}
-          >
-            Highest Score
-          </button>
-        </div>
+      {/* Filter Buttons */}
+      <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
+        <button 
+          onClick={() => setFilter("all")}
+          style={{ 
+            padding: "6px 16px", 
+            borderRadius: "20px", 
+            border: "1px solid #E8E9EF",
+            background: filter === "all" ? "#4F46E5" : "white",
+            color: filter === "all" ? "white" : "#6B7080",
+            cursor: "pointer",
+            fontSize: "13px"
+          }}
+        >
+          All Questions
+        </button>
+        <button 
+          onClick={() => setFilter("strong")}
+          style={{ 
+            padding: "6px 16px", 
+            borderRadius: "20px", 
+            border: "1px solid #E8E9EF",
+            background: filter === "strong" ? "#059669" : "white",
+            color: filter === "strong" ? "white" : "#6B7080",
+            cursor: "pointer",
+            fontSize: "13px"
+          }}
+        >
+          Strong (≥7)
+        </button>
+        <button 
+          onClick={() => setFilter("weak")}
+          style={{ 
+            padding: "6px 16px", 
+            borderRadius: "20px", 
+            border: "1px solid #E8E9EF",
+            background: filter === "weak" ? "#DC2626" : "white",
+            color: filter === "weak" ? "white" : "#6B7080",
+            cursor: "pointer",
+            fontSize: "13px"
+          }}
+        >
+          Weak (&lt;5)
+        </button>
       </div>
 
       {/* History List */}
-      <div className="history-list-enhanced">
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         {filteredHistory.map((item, idx) => {
           const scoreColor = getScoreColor(item.score);
           const isExpanded = expandedId === idx;
@@ -190,96 +192,143 @@ export default function HistoryPanel({ userId }) {
           return (
             <div 
               key={idx} 
-              className={`history-item-enhanced ${isExpanded ? "expanded" : ""}`}
-              style={{ borderLeftColor: scoreColor.border }}
+              style={{ 
+                background: "white", 
+                border: "1px solid #E8E9EF", 
+                borderRadius: "12px",
+                overflow: "hidden"
+              }}
             >
+              {/* Header - Click to expand */}
               <div 
-                className="history-item-header"
                 onClick={() => setExpandedId(isExpanded ? null : idx)}
+                style={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: "16px", 
+                  padding: "16px",
+                  cursor: "pointer",
+                  borderBottom: isExpanded ? "1px solid #E8E9EF" : "none"
+                }}
               >
-                <div className="history-score-badge" style={{ background: scoreColor.bg }}>
-                  <span className="score-value" style={{ color: scoreColor.text }}>
-                    {item.score?.toFixed(1) || "—"}
-                  </span>
-                  <span className="score-label" style={{ color: scoreColor.text }}>
-                    {getScoreLabel(item.score)}
-                  </span>
+                {/* Score Badge */}
+                <div style={{ 
+                  minWidth: "75px", 
+                  padding: "8px 12px", 
+                  borderRadius: "10px", 
+                  textAlign: "center",
+                  background: scoreColor.bg
+                }}>
+                  <div style={{ fontSize: "18px", fontWeight: "bold", color: scoreColor.text }}>{item.score?.toFixed(1) || "—"}</div>
+                  <div style={{ fontSize: "10px", color: scoreColor.text }}>{scoreColor.label}</div>
                 </div>
                 
-                <div className="history-question-preview">
-                  <div className="question-text">{item.question}</div>
-                  <div className="question-meta">
-                    <span className="meta-item">
-                      <FiCalendar size={12} />
-                      {formatDate(item.created_at)}
+                {/* Question Preview */}
+                <div style={{ flex: 1 }}>
+                  <div style={{ 
+                    fontWeight: 500, 
+                    marginBottom: "6px",
+                    fontSize: "14px",
+                    color: "#0F1117",
+                    lineHeight: 1.4
+                  }}>
+                    {item.question?.slice(0, 100)}...
+                  </div>
+                  <div style={{ display: "flex", gap: "16px", fontSize: "11px", color: "#6B7080" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <FiCalendar size={11} /> {formatDate(item.created_at)}
                     </span>
-                    {item.technical && (
-                      <span className="meta-item">
-                        <FiBarChart2 size={12} />
-                        Tech: {item.technical}
-                      </span>
-                    )}
+                    <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <FiMessageSquare size={11} /> Answer length: {item.answer?.length || 0} chars
+                    </span>
                   </div>
                 </div>
                 
-                <div className="expand-icon">
+                {/* Expand Icon */}
+                <div style={{ color: "#9EA4B5" }}>
                   {isExpanded ? <FiChevronDown /> : <FiChevronRight />}
                 </div>
               </div>
               
+              {/* Expanded Content - Shows full question and answer */}
               {isExpanded && (
-                <div className="history-item-details">
-                  <div className="detail-section">
-                    <div className="detail-title">
-                      <FiMessageSquare size={14} />
-                      Your Answer
+                <div style={{ padding: "16px", background: "#F8F9FC" }}>
+                  {/* Full Question */}
+                  <div style={{ marginBottom: "16px" }}>
+                    <div style={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: "6px", 
+                      marginBottom: "8px",
+                      color: "#4F46E5",
+                      fontSize: "12px",
+                      fontWeight: 600
+                    }}>
+                      <FiHelpCircle size={14} /> QUESTION ASKED
                     </div>
-                    <div className="detail-content">{item.answer}</div>
+                    <div style={{ 
+                      padding: "12px", 
+                      background: "white", 
+                      borderRadius: "8px",
+                      fontSize: "14px",
+                      lineHeight: 1.5,
+                      color: "#0F1117"
+                    }}>
+                      {item.question || "Question not available"}
+                    </div>
                   </div>
                   
+                  {/* User's Answer */}
+                  <div style={{ marginBottom: "12px" }}>
+                    <div style={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: "6px", 
+                      marginBottom: "8px",
+                      color: "#6B7080",
+                      fontSize: "12px",
+                      fontWeight: 600
+                    }}>
+                      <FiMessageSquare size={14} /> YOUR ANSWER
+                    </div>
+                    <div style={{ 
+                      padding: "12px", 
+                      background: "white", 
+                      borderRadius: "8px",
+                      fontSize: "14px",
+                      lineHeight: 1.5,
+                      color: "#0F1117"
+                    }}>
+                      {item.answer || "Answer not available"}
+                    </div>
+                  </div>
+                  
+                  {/* Feedback if available */}
                   {item.feedback && (
-                    <>
-                      <div className="detail-section">
-                        <div className="detail-title">
-                          <FiCheckCircle size={14} color="#059669" />
-                          Strengths
-                        </div>
-                        <div className="detail-content">{item.feedback.strengths || "Good effort on this answer"}</div>
-                      </div>
-                      
-                      <div className="detail-section warning">
-                        <div className="detail-title">
-                          <FiAlertCircle size={14} color="#D97706" />
-                          Areas for Improvement
-                        </div>
-                        <div className="detail-content">{item.feedback.improvements || "Add more specific examples"}</div>
-                      </div>
-                    </>
+                    <div style={{ 
+                      padding: "12px", 
+                      background: "#EEF2FF", 
+                      borderRadius: "8px",
+                      marginTop: "8px"
+                    }}>
+                      <strong style={{ fontSize: "12px", color: "#4F46E5" }}>Feedback:</strong>
+                      <p style={{ marginTop: "6px", fontSize: "13px", lineHeight: 1.5 }}>{item.feedback}</p>
+                    </div>
                   )}
                   
-                  {item.technical && (
-                    <div className="score-breakdown">
-                      <div className="score-breakdown-item">
-                        <span>Technical</span>
-                        <div className="progress-bar-mini">
-                          <div className="progress-fill" style={{ width: `${(item.technical / 10) * 100}%` }} />
-                        </div>
-                        <span>{item.technical}/10</span>
-                      </div>
-                      <div className="score-breakdown-item">
-                        <span>Depth</span>
-                        <div className="progress-bar-mini">
-                          <div className="progress-fill" style={{ width: `${(item.depth / 10) * 100}%` }} />
-                        </div>
-                        <span>{item.depth}/10</span>
-                      </div>
-                      <div className="score-breakdown-item">
-                        <span>Clarity</span>
-                        <div className="progress-bar-mini">
-                          <div className="progress-fill" style={{ width: `${(item.clarity / 10) * 100}%` }} />
-                        </div>
-                        <span>{item.clarity}/10</span>
-                      </div>
+                  {/* Score breakdown if available */}
+                  {(item.technical || item.depth || item.clarity) && (
+                    <div style={{ 
+                      display: "flex", 
+                      gap: "12px", 
+                      marginTop: "12px",
+                      padding: "10px",
+                      background: "white",
+                      borderRadius: "8px"
+                    }}>
+                      {item.technical && <span><strong>Tech:</strong> {item.technical}/10</span>}
+                      {item.depth && <span><strong>Depth:</strong> {item.depth}/10</span>}
+                      {item.clarity && <span><strong>Clarity:</strong> {item.clarity}/10</span>}
                     </div>
                   )}
                 </div>
