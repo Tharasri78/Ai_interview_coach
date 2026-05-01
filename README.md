@@ -186,13 +186,12 @@ GROQ_API_KEY=your_groq_api_key_here
 
 Screenshots available in `docs/images/`
 
-```
+
 
 ## 👨‍💻 Author
 ## Tharasri B
 
 
----
 
 
 
