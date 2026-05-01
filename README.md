@@ -182,9 +182,14 @@ prepply/
 ```env
 GROQ_API_KEY=your_groq_api_key_here
 ```
+## Demo
 
-##👨‍💻 Author
-##Tharasri B
+Screenshots available in `docs/images/`
+
+```
+
+## 👨‍💻 Author
+## Tharasri B
 
 
 ---
