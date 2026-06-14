@@ -1,7 +1,4 @@
-
-
-
-#  AI-POWERED INTERVIEW COACH
+# AI-POWERED INTERVIEW COACH
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react)](https://reactjs.org/)
@@ -10,24 +7,22 @@
 [![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite)](https://sqlite.org/)
 [![Groq](https://img.shields.io/badge/Groq-LLM-FF6B6B?logo=groq)](https://groq.com)
 
-
-
-
 **Prepply** is an AI-powered interview preparation platform that generates personalized questions based on your resume, evaluates your answers, and provides actionable feedback to help you ace technical interviews.
 
 ## ✨ Features
 
--  **Resume-Based Questions** - Upload your PDF resume, get personalized questions based on your actual skills and experience
--  **3-Round Interview Flow** - HR → Technical → Deep Dive - mirrors real interview processes at top tech companies
--  **AI-Powered Evaluation** - Get detailed scores on technical accuracy, depth, and clarity with actionable feedback
--  **Coding Challenges** - Solve algorithmic problems with test case validation and instant feedback
--  **Performance Analytics** - Track strengths, weaknesses, and improvement over time with detailed summaries
--  **Real-time Feedback** - Live answer quality hints using STAR method analysis
--  **Progress Tracking** - Visual progress bar and round indicators throughout the interview
+- **Resume-Based Questions** - Upload your PDF resume, get personalized questions based on your actual skills and experience
+- **3-Round Interview Flow** - HR → Technical → Deep Dive - mirrors real interview processes at top tech companies
+- **AI-Powered Evaluation** - Get detailed scores on technical accuracy, depth, and clarity with actionable feedback
+- **Coding Challenges** - Solve algorithmic problems with test case validation and instant feedback
+- **Performance Analytics** - Track strengths, weaknesses, and improvement over time with detailed summaries
+- **Real-time Feedback** - Live answer quality hints using STAR method analysis
+- **Progress Tracking** - Visual progress bar and round indicators throughout the interview
 
-##  Tech Stack
+## Tech Stack
 
 ### Frontend
+
 - **React 18** - UI framework
 - **React Router DOM** - Navigation
 - **Axios** - API calls
@@ -36,6 +31,7 @@
 - **CSS Modules** - Styling
 
 ### Backend
+
 - **FastAPI** - REST API framework
 - **SQLAlchemy** - ORM for database
 - **SQLite** - Database
@@ -45,13 +41,13 @@
 - **Sentence Transformers** - Embeddings for resume search
 - **FAISS** - Vector storage
 
-##  Prerequisites
+## Prerequisites
 
 - Node.js (v18 or higher)
 - Python (v3.10 or higher)
 - Groq API key ([Get one here](https://console.groq.com))
 
-##  Installation
+## Installation
 
 ### 1. Clone the repository
 
@@ -90,83 +86,94 @@ cd frontend
 # Install dependencies
 npm install
 
+# Create a local env file for the frontend API URL
+# (replace with your deployed backend URL)
+cp .env.example .env
+
 # Run development server
 npm run dev
 ```
 
+npm run dev
+
+```
 
 ## 📁 Project Structure
 
 ```
+
 prepply/
 ├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   │   └── routes/
-│   │   │       ├── auth.py
-│   │   │       ├── upload.py
-│   │   │       ├── interview.py
-│   │   │       ├── history.py
-│   │   │       └── summary.py
-│   │   ├── services/
-│   │   │   ├── interview_service.py
-│   │   │   ├── question_service.py
-│   │   │   ├── evaluation_service.py
-│   │   │   ├── rag_service.py
-│   │   │   └── summary_service.py
-│   │   ├── db/
-│   │   │   ├── database.py
-│   │   │   └── models.py
-│   │   ├── core/
-│   │   │   └── llm.py
-│   │   └── utils/
-│   │       └── parser.py
-│   ├── requirements.txt
-│   └── .env
+│ ├── app/
+│ │ ├── api/
+│ │ │ └── routes/
+│ │ │ ├── auth.py
+│ │ │ ├── upload.py
+│ │ │ ├── interview.py
+│ │ │ ├── history.py
+│ │ │ └── summary.py
+│ │ ├── services/
+│ │ │ ├── interview_service.py
+│ │ │ ├── question_service.py
+│ │ │ ├── evaluation_service.py
+│ │ │ ├── rag_service.py
+│ │ │ └── summary_service.py
+│ │ ├── db/
+│ │ │ ├── database.py
+│ │ │ └── models.py
+│ │ ├── core/
+│ │ │ └── llm.py
+│ │ └── utils/
+│ │ └── parser.py
+│ ├── requirements.txt
+│ └── .env
 ├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Upload.jsx
-│   │   │   ├── InterviewBox.jsx
-│   │   │   └── HistoryPanel.jsx
-│   │   ├── pages/
-│   │   │   ├── Landing.jsx
-│   │   │   ├── Auth.jsx
-│   │   │   ├── Dashboard.jsx
-│   │   │   └── Summary.jsx
-│   │   ├── api/
-│   │   │   └── apiService.js
-│   │   └── App.jsx
-│   └── package.json
+│ ├── src/
+│ │ ├── components/
+│ │ │ ├── Upload.jsx
+│ │ │ ├── InterviewBox.jsx
+│ │ │ └── HistoryPanel.jsx
+│ │ ├── pages/
+│ │ │ ├── Landing.jsx
+│ │ │ ├── Auth.jsx
+│ │ │ ├── Dashboard.jsx
+│ │ │ └── Summary.jsx
+│ │ ├── api/
+│ │ │ └── apiService.js
+│ │ └── App.jsx
+│ └── package.json
 └── README.md
+
 ```
 
 ## 🔄 Interview Flow
 
 ```
+
 ┌─────────────────────────────────────────────────────────────┐
-│                     6 Questions / 3 Rounds                   │
+│ 6 Questions / 3 Rounds │
 ├─────────────────────────────────────────────────────────────┤
-│  Q1  │  HR Round        │ Project-based behavioral question │
-│  Q2  │  HR Round        │ Problem-solving & conflict         │
-│  Q3  │  Technical Round │ Resume-based technical question    │
-│  Q4  │  Technical Round │ General concept question           │
-│  Q5  │  Technical Round │ Coding challenge (with test cases) │
-│  Q6  │  Deep Dive       │ Adaptive follow-up question        │
+│ Q1 │ HR Round │ Project-based behavioral question │
+│ Q2 │ HR Round │ Problem-solving & conflict │
+│ Q3 │ Technical Round │ Resume-based technical question │
+│ Q4 │ Technical Round │ General concept question │
+│ Q5 │ Technical Round │ Coding challenge (with test cases) │
+│ Q6 │ Deep Dive │ Adaptive follow-up question │
 └─────────────────────────────────────────────────────────────┘
-```
 
-##  API Endpoints
+````
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/signup/` | User registration |
-| POST | `/auth/login/` | User login |
-| POST | `/upload/upload-pdf/` | Upload resume PDF |
-| POST | `/interview/start-interview/` | Start interview session |
-| POST | `/interview/next-step/` | Submit answer, get next question |
-| GET | `/history/{user_id}` | Get answer history |
-| GET | `/summary/{user_id}` | Get performance summary |
+## API Endpoints
+
+| Method | Endpoint                      | Description                      |
+| ------ | ----------------------------- | -------------------------------- |
+| POST   | `/auth/signup/`               | User registration                |
+| POST   | `/auth/login/`                | User login                       |
+| POST   | `/upload/upload-pdf/`         | Upload resume PDF                |
+| POST   | `/interview/start-interview/` | Start interview session          |
+| POST   | `/interview/next-step/`       | Submit answer, get next question |
+| GET    | `/history/{user_id}`          | Get answer history               |
+| GET    | `/summary/{user_id}`          | Get performance summary          |
 
 ## How It Works
 
@@ -179,19 +186,15 @@ prepply/
 ## 🔧 Environment Variables
 
 ### Backend (.env)
+
 ```env
 GROQ_API_KEY=your_groq_api_key_here
-```
+````
+
 ## Demo
 
 Screenshots available in `docs/images/`
 
-
-
 ## 👨‍💻 Author
+
 ## Tharasri B
-
-
-
-
-
