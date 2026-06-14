@@ -10,8 +10,8 @@ langchain-core==0.1.52
 langchain-community==0.0.32
 
 # Groq (LLM)
-groq==0.9.0
-
+groq==0.37.1
+httpx==0.28.1
 # Vector + NLP
 faiss-cpu==1.7.4
 pypdf==4.2.0
